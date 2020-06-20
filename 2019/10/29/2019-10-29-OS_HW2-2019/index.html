@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          CSIE--NachOS-HW2 - Wii
+        
+    </title>
+
+    <link rel="canonical" href="https://wiiwu959.github.io/2019/10/29/2019-10-29-OS_HW2-2019/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('post-bg-coffee.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#homeworks" title="homeworks">homeworks</a>
+                            
+                        </div>
+                        <h1>CSIE--NachOS-HW2</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by wiiwu on
+                            2019-10-29
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Wii&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>這次的作業是要求讓NachOS能實現multi-programming，還有完成</p>
+<ul>
+<li>先進先出排程 (First-Come-First-Service, FCFS)</li>
+<li>最短工作優先排程 (Shortest-Job-First, SJF)</li>
+<li>最短剩餘時間排程 (shortest remaining time first ,SRTF)</li>
+</ul>
+<p>multi-programming上次測試Sleep時遇到記憶體互相覆蓋的問題以後就已經改好了，所以賺到XD，這次作業主要就是實現以上的那些排程法。</p>
+<h1 id="selftest">SelfTest</h1>
+<p>在作業說明中就有提到很多class裡面都有這個東西，可以讓我們不用利用/test底下的程式來測我們的成果，而且助教也有在github上更新了一部分的code</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/thread.cc</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// 印出現在正在跑的thread的[Name: BurstTime]</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">SimpleThread()</span><br><span class="line">&#123;</span><br><span class="line">    Thread *thread = kernel-&gt;currentThread;</span><br><span class="line">    <span class="keyword">while</span> (thread-&gt;getBurstTime() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        thread-&gt;setBurstTime(thread-&gt;getBurstTime() - <span class="number">1</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%s: %d\n"</span>, kernel-&gt;currentThread-&gt;getName(), </span><br><span class="line">                kernel-&gt;currentThread-&gt;getBurstTime());</span><br><span class="line">        kernel-&gt;interrupt-&gt;OneTick();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 會初始化thread的資訊，然後還會Call到SimpleThread()</span></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">Thread::SelfTest()</span><br><span class="line">&#123;</span><br><span class="line">    DEBUG(dbgThread, <span class="string">"Entering Thread::SelfTest"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">int</span> number     = <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">char</span> *name[number]   = &#123;<span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>&#125;;</span><br><span class="line">    <span class="keyword">int</span> burst[number]    = &#123;<span class="number">3</span>, <span class="number">10</span>, <span class="number">4</span>&#125;;</span><br><span class="line">    <span class="keyword">int</span> priority[number] = &#123;<span class="number">4</span>, <span class="number">5</span>, <span class="number">3</span>&#125;;</span><br><span class="line">    <span class="keyword">int</span> arrive[number] = &#123;<span class="number">3</span>, <span class="number">0</span>, <span class="number">5</span>&#125;;</span><br><span class="line"></span><br><span class="line">    Thread *t;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; number; i ++) &#123;</span><br><span class="line">        t = <span class="keyword">new</span> Thread(name[i]);</span><br><span class="line">        t-&gt;setPriority(priority[i]);</span><br><span class="line">        t-&gt;setBurstTime(burst[i]);</span><br><span class="line">        t-&gt;Fork((VoidFunctionPtr) SimpleThread, (<span class="keyword">void</span> *)<span class="literal">NULL</span>);</span><br><span class="line">        <span class="comment">// SRTF的部分，直接把還沒arrive的thread丟去sleep直到他arrive的時間到</span></span><br><span class="line">        <span class="keyword">if</span>(kernel-&gt;scheduler-&gt;getSchedulerType() == SRTF)&#123;</span><br><span class="line">            kernel-&gt;alarm-&gt;sleepList.PutToSleep(t,arrive[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    kernel-&gt;currentThread-&gt;Yield();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在h檔裡面也要加上我們用到的那幾個function</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/thread.h</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">CheckOverflow</span><span class="params">()</span></span>;   	<span class="comment">// Check if thread stack has overflowed</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setStatus</span><span class="params">(ThreadStatus st)</span> </span>&#123; status = st; &#125;</span><br><span class="line"><span class="function"><span class="keyword">char</span>* <span class="title">getName</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> (name); &#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Print</span><span class="params">()</span> </span>&#123; <span class="built_in">cout</span> &lt;&lt; name; &#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">SelfTest</span><span class="params">()</span></span>;		<span class="comment">// test whether thread impl is working</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 加上下面四個</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setBurstTime</span><span class="params">(<span class="keyword">int</span> t)</span>	</span>&#123;burstTime = t;&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getBurstTime</span><span class="params">()</span>		</span>&#123;<span class="keyword">return</span> burstTime;&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setPriority</span><span class="params">(<span class="keyword">int</span> t)</span>	</span>&#123;priority = t;&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getPriority</span><span class="params">()</span>		</span>&#123;<span class="keyword">return</span> priority;&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">ThreadStatus status;	<span class="comment">// ready, running or blocked</span></span><br><span class="line"><span class="keyword">char</span>* name;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加上這兩個</span></span><br><span class="line"><span class="keyword">int</span> burstTime;</span><br><span class="line"><span class="keyword">int</span> priority;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">StackAllocate</span><span class="params">(VoidFunctionPtr func, <span class="keyword">void</span> *arg)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>看網路上也有做法是另外寫一個function，再到/code/threads/kernel.cc裡頭的SelfTest裡面加上執行這個function，不過是一樣的意思。<br>
+<a href="https://morris821028.github.io/2014/05/30/lesson/hw-nachos4-2/#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E6%B8%AC%E8%A9%A6" target="_blank" rel="noopener">Morris’ blog</a>就是用這個做法。</p>
+<p>完成之後，就能直接在/code/threads資料夾裡面下 <code>./nachos</code><br>
+就會跑SelfTest裡面的東西了。</p>
+<p>接著還做了這一段好讓我們可以選擇使用的方法</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/kernel.cc</span><br><span class="line"></span><br><span class="line">ThreadedKernel::ThreadedKernel(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span><br><span class="line">&#123;</span><br><span class="line">    randomSlice = FALSE; </span><br><span class="line">    <span class="comment">// 加這一行</span></span><br><span class="line">    type = RR;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; argc; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(argv[i], <span class="string">"-rs"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line"> 	    ASSERT(i + <span class="number">1</span> &lt; argc);</span><br><span class="line">	    RandomInit(atoi(argv[i + <span class="number">1</span>]));<span class="comment">// initialize pseudo-random</span></span><br><span class="line">					                  <span class="comment">// number generator</span></span><br><span class="line">	    randomSlice = TRUE;</span><br><span class="line">	    i++;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(argv[i], <span class="string">"-u"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; <span class="string">"Partial usage: nachos [-rs randomSeed]\n"</span>;</span><br><span class="line">	    &#125;</span><br><span class="line">    <span class="comment">////// 加上這一段，讀參數用的 ////////////</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(<span class="built_in">strcmp</span>(argv[i], <span class="string">"RR"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">            type = RR;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(argv[i], <span class="string">"FCFS"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">            type = FIFO;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(argv[i], <span class="string">"PRIORITY"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">            type = Priority;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(argv[i], <span class="string">"SJF"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">            type = SJF;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(argv[i], <span class="string">"SRTF"</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">            type = SRTF;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="comment">////////////////////////////////////////</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">ThreadedKernel::Initialize()</span><br><span class="line">&#123;</span><br><span class="line">    stats = <span class="keyword">new</span> Statistics();		<span class="comment">// collect statistics</span></span><br><span class="line">    interrupt = <span class="keyword">new</span> Interrupt;		<span class="comment">// start up interrupt handling</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 這裡這建構子加上type參數</span></span><br><span class="line">    scheduler = <span class="keyword">new</span> Scheduler(type);	<span class="comment">// initialize the ready queue</span></span><br><span class="line">    alarm = <span class="keyword">new</span> Alarm(randomSlice);	<span class="comment">// start up time slicing</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>在.h檔</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/kernel.h</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">bool</span> randomSlice;		<span class="comment">// enable pseudo-random time slicing</span></span><br><span class="line">    <span class="comment">// 加上</span></span><br><span class="line">    SchedulerType type;</span><br></pre></td></tr></table></figure>
+<p>這樣就可以利用多一個參數來決定要用的schedule方法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ ./nachos RR</span><br><span class="line">$ ./nachos FCFS</span><br><span class="line">$ ./nachos PRIORITY</span><br><span class="line">$ ./nachos SJF</span><br><span class="line">$ ./nachos SRTF</span><br></pre></td></tr></table></figure>
+<p>接著就可以來實際做我們要實作的那幾個東東了~</p>
+<h1 id="scheduler">Scheduler</h1>
+<p>先修改該修的.h</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/scheduler.h</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> SchedulerType &#123;</span><br><span class="line">    RR,     <span class="comment">// Round Robin</span></span><br><span class="line">    SJF,</span><br><span class="line">    Priority,</span><br><span class="line">    FIFO,</span><br><span class="line">    SRTF</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Scheduler</span> &#123;</span></span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">	Scheduler();		        <span class="comment">// Initialize list of ready threads </span></span><br><span class="line">	Scheduler(SchedulerType type); <span class="comment">// 這個要改，加上參數</span></span><br><span class="line">	~Scheduler();				<span class="comment">// De-allocate ready list</span></span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">ReadyToRun</span><span class="params">(Thread* thread)</span></span>;	</span><br><span class="line">				                <span class="comment">// Thread can be dispatched.</span></span><br><span class="line">	<span class="function">Thread* <span class="title">FindNextToRun</span><span class="params">()</span></span>;	<span class="comment">// Dequeue first thread on the ready </span></span><br><span class="line">					            <span class="comment">// list, if any, and return thread.</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">Run</span><span class="params">(Thread* nextThread, <span class="keyword">bool</span> finishing)</span></span>;</span><br><span class="line">	    				        <span class="comment">// Cause nextThread to start running</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">CheckToBeDestroyed</span><span class="params">()</span></span>;	<span class="comment">// Check if thread that had been</span></span><br><span class="line">    					        <span class="comment">// running needs to be deleted</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">Print</span><span class="params">()</span></span>;			    <span class="comment">// Print contents of ready list</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 加上</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setSchedulerType</span><span class="params">(SchedulerType t)</span> </span>&#123;schedulerType = t;&#125;</span><br><span class="line">	<span class="function">SchedulerType <span class="title">getSchedulerType</span><span class="params">()</span> </span>&#123;<span class="keyword">return</span> schedulerType;&#125;</span><br></pre></td></tr></table></figure>
+<p>最主要要動手腳的地方就在這裡!根據不同的排程方法，造出不同的ReadyList。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/scheduler.cc</span><br><span class="line"></span><br><span class="line"><span class="comment">// 加上compare function(做sortlist的時候要用的)</span></span><br><span class="line"><span class="comment">//----------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">// Compare function</span></span><br><span class="line"><span class="comment">//----------------------------------------------------------------------</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">PriorityCompare</span><span class="params">(Thread *a, Thread *b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(a-&gt;getPriority() == b-&gt;getPriority())</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> a-&gt;getPriority() &gt; b-&gt;getPriority() ? <span class="number">1</span> : <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">FIFOCompare</span><span class="params">(Thread *a, Thread *b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">SJFCompare</span><span class="params">(Thread *a, Thread *b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(a-&gt;getBurstTime() == b-&gt;getBurstTime())</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> a-&gt;getBurstTime() &gt; b-&gt;getBurstTime() ? <span class="number">1</span> : <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//----------------------------------------------------------------------</span></span><br><span class="line"><span class="comment">// Scheduler::Scheduler</span></span><br><span class="line"><span class="comment">// 	Initialize the list of ready but not running threads.</span></span><br><span class="line"><span class="comment">//	Initially, no ready threads.</span></span><br><span class="line"><span class="comment">//----------------------------------------------------------------------</span></span><br><span class="line">Scheduler::Scheduler()</span><br><span class="line">&#123; </span><br><span class="line">	Scheduler(RR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主要要自己動手的地方都在這裡而已</span></span><br><span class="line">Scheduler::Scheduler(SchedulerType type)</span><br><span class="line">&#123;</span><br><span class="line">	schedulerType = type;</span><br><span class="line">	<span class="keyword">switch</span>(schedulerType) &#123;</span><br><span class="line">        <span class="keyword">case</span> RR:</span><br><span class="line">            readyList = <span class="keyword">new</span> List&lt;Thread *&gt;;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> SJF:</span><br><span class="line">            readyList = <span class="keyword">new</span> SortedList&lt;Thread *&gt;(SJFCompare);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> Priority:</span><br><span class="line">            readyList = <span class="keyword">new</span> SortedList&lt;Thread *&gt;(PriorityCompare);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> FIFO:</span><br><span class="line">            readyList = <span class="keyword">new</span> SortedList&lt;Thread *&gt;(FIFOCompare);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> SRTF:</span><br><span class="line">            <span class="comment">// 和SJF其實一樣，這兩個的差別本來就只有是不是preemptive而已</span></span><br><span class="line">            readyList = <span class="keyword">new</span> SortedList&lt;Thread *&gt;(SJFCompare);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">   	&#125;</span><br><span class="line">	toBeDestroyed = <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>SRTF有preemptive，所以比較麻煩需要對原本已經完成的Sleep部分多做調整，讓他可以直接被我們的排程使用</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/alarm.cc</span><br><span class="line"></span><br><span class="line"><span class="comment">// 對原本的PutToSleep多做調整</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">SleepList::PutToSleep</span><span class="params">(Thread*t, <span class="keyword">int</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    IntStatus oldLevel = kernel-&gt;interrupt-&gt;SetLevel(IntOff); <span class="comment">// 不讓其他thread可以中斷</span></span><br><span class="line">    ASSERT(kernel-&gt;interrupt-&gt;getLevel() == IntOff);		  <span class="comment">// check if it cannot be interrupt.</span></span><br><span class="line">    threadlist.push_back(SleepThread(t, counter + x));        <span class="comment">// put into the list</span></span><br><span class="line">    <span class="keyword">if</span>(kernel-&gt;scheduler-&gt;getSchedulerType() != SRTF)&#123;</span><br><span class="line">    	t-&gt;Sleep(<span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    kernel-&gt;interrupt-&gt;SetLevel(oldLevel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// PutToReady的最前和最後也做了關掉中斷的動作</span></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">SleepList::PutToReady</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    IntStatus oldLevel = kernel-&gt;interrupt-&gt;SetLevel(IntOff);</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    kernel-&gt;interrupt-&gt;SetLevel(oldLevel);</span><br><span class="line">    <span class="keyword">return</span> woken;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Fork裡面把SRTF的ReadyToRun關掉<br>
+Yield裡面也要加上判斷下一個thread是誰、會不會被中斷換掉</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">/code/threads/thread.cc</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> </span><br><span class="line">Thread::Fork(VoidFunctionPtr func, <span class="keyword">void</span> *arg)</span><br><span class="line">&#123;</span><br><span class="line">    Interrupt *interrupt = kernel-&gt;interrupt;</span><br><span class="line">    Scheduler *scheduler = kernel-&gt;scheduler;</span><br><span class="line">    IntStatus oldLevel;</span><br><span class="line">    </span><br><span class="line">    DEBUG(dbgThread, <span class="string">"Forking thread: "</span> &lt;&lt; name &lt;&lt; <span class="string">" f(a): "</span> &lt;&lt; (<span class="keyword">int</span>) func &lt;&lt; <span class="string">" "</span> &lt;&lt; arg);</span><br><span class="line">    </span><br><span class="line">    StackAllocate(func, arg);</span><br><span class="line"></span><br><span class="line">    oldLevel = interrupt-&gt;SetLevel(IntOff);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(scheduler-&gt;getSchedulerType() != SRTF)&#123; <span class="comment">//因為他不一定一fork就可以run</span></span><br><span class="line">        scheduler-&gt;ReadyToRun(<span class="keyword">this</span>);	<span class="comment">// ReadyToRun assumes that interrupts are disabled!</span></span><br><span class="line">    &#125;</span><br><span class="line">    (<span class="keyword">void</span>) interrupt-&gt;SetLevel(oldLevel);</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">Thread::Yield ()</span><br><span class="line">&#123;</span><br><span class="line">    Thread *nextThread;</span><br><span class="line">    IntStatus oldLevel = kernel-&gt;interrupt-&gt;SetLevel(IntOff);</span><br><span class="line">    </span><br><span class="line">    ASSERT(<span class="keyword">this</span> == kernel-&gt;currentThread);</span><br><span class="line">    </span><br><span class="line">    DEBUG(dbgThread, <span class="string">"Yielding thread: "</span> &lt;&lt; name);</span><br><span class="line"></span><br><span class="line">    nextThread = kernel-&gt;scheduler-&gt;FindNextToRun();</span><br><span class="line">    <span class="comment">// 更改這一段//////////////////////////////////////////////////</span></span><br><span class="line">    <span class="keyword">if</span> (nextThread != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">// 因為是preemtive所以每次的yield都要判斷會不會被中斷</span></span><br><span class="line">        <span class="comment">// 有可能不會被中斷，所以不能像其他排程法一樣直接把nextThread丟到ReadyToRun</span></span><br><span class="line">        <span class="keyword">if</span>(kernel-&gt;scheduler-&gt;getSchedulerType() == SRTF)&#123;	</span><br><span class="line">            <span class="keyword">if</span>(nextThread-&gt;getBurstTime() &lt; <span class="keyword">this</span>-&gt;getBurstTime())&#123;</span><br><span class="line">                kernel-&gt;scheduler-&gt;ReadyToRun(<span class="keyword">this</span>);</span><br><span class="line">                kernel-&gt;scheduler-&gt;Run(nextThread, FALSE);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span>&#123;</span><br><span class="line">                kernel-&gt;scheduler-&gt;ReadyToRun(nextThread);</span><br><span class="line">            &#125;</span><br><span class="line">	    &#125;</span><br><span class="line">	    <span class="keyword">else</span>&#123;</span><br><span class="line">            kernel-&gt;scheduler-&gt;ReadyToRun(<span class="keyword">this</span>);</span><br><span class="line">            kernel-&gt;scheduler-&gt;Run(nextThread, FALSE);</span><br><span class="line">	    &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">////////////////////////////////////////////////////////////////</span></span><br><span class="line">    (<span class="keyword">void</span>) kernel-&gt;interrupt-&gt;SetLevel(oldLevel);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>完成!</p>
+<h1 id="結果">結果</h1>
+<h2 id="用selftest">用SelfTest</h2>
+<ul>
+<li>SJF<br>
+<img src="SJF.jpg" alt></li>
+<li>SRTF<br>
+<img src="SRTF.jpg" alt></li>
+</ul>
+<h2 id="用userprog">用userprog</h2>
+<ul>
+<li>FCFS<br>
+<img src="FCFS1.jpg" alt><br>
+<img src="FCFS2.jpg" alt></li>
+</ul>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/12/09/2019-12-09-OS-HW3-2019/" data-toggle="tooltip" data-placement="top" title="CSIE--NachOS-HW3">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/10/10/2019-10-10-OS_HW1-2019/" data-toggle="tooltip" data-placement="top" title="CSIE--NachOS-HW1">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多說 Share end-->
+
+                <!-- 多說評論框 start -->
+                
+                <!-- 多說評論框 end -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#selftest"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">SelfTest</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#scheduler"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">Scheduler</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#結果"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">結果</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#用selftest"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">用SelfTest</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#用userprog"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">用userprog</span></a></li></ol></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#homeworks" title="homeworks">homeworks</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'owo'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/wiiwu959">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; wiiwu 2020 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    re-Ported by <a href="http://beantech.org">BeanTech</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=YenYuHsuan&repo=hexo-theme-beantech&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://wiiwu959.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-154652936-1';
+    var _gaDomain = 'auto';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<img src="https://wiiwu959.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
