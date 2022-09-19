@@ -1,0 +1,939 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="paper: https:&#x2F;&#x2F;pacmanattack.com&#x2F;paper.pdf  Abstract這篇 paper 提出新的攻擊方式叫做 PACMAN，結合 memory corruption 漏洞和 speculative excution 漏洞的攻擊，利用 side channels 在不造成 crash 的情況下 speculatively leaks PAC verification">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PACMAN: Attacking ARM Pointer Authentication with Speculative Execution">
+<meta property="og:url" content="https://wiiwu959.github.io/2022/06/28/2022-06-28-PACMAN/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="paper: https:&#x2F;&#x2F;pacmanattack.com&#x2F;paper.pdf  Abstract這篇 paper 提出新的攻擊方式叫做 PACMAN，結合 memory corruption 漏洞和 speculative excution 漏洞的攻擊，利用 side channels 在不造成 crash 的情況下 speculatively leaks PAC verification">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.imgur.com/1ME9fSO.png?350x">
+<meta property="og:image" content="https://i.imgur.com/b1DqMo7.png?350x">
+<meta property="og:image" content="https://i.imgur.com/ggHiYGL.png">
+<meta property="og:image" content="https://i.imgur.com/X67JkSK.png?400x">
+<meta property="og:image" content="https://i.imgur.com/s62UYtI.png?450x">
+<meta property="og:image" content="https://i.imgur.com/uSi0SoO.png?450x">
+<meta property="og:image" content="https://i.imgur.com/jxtNlZS.png?450x">
+<meta property="og:image" content="https://i.imgur.com/9qEmBjx.png?500x">
+<meta property="og:image" content="https://i.imgur.com/kht8qCB.png">
+<meta property="og:image" content="https://i.imgur.com/TrUiXAy.png?500x">
+<meta property="og:image" content="https://i.imgur.com/3PrxiYJ.png?500x">
+<meta property="og:image" content="https://i.imgur.com/jnGA7tw.png?500x">
+<meta property="og:image" content="https://i.imgur.com/ryxncvG.png?500x">
+<meta property="og:image" content="https://i.imgur.com/NgeVvd3.png?500x">
+<meta property="article:published_time" content="2022-06-28T07:30:42.000Z">
+<meta property="article:modified_time" content="2022-09-19T09:06:17.261Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="paper">
+<meta property="article:tag" content="security">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.imgur.com/1ME9fSO.png?350x">
+  
+  
+  
+  <title>PACMAN: Attacking ARM Pointer Authentication with Speculative Execution - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"wiiwu959.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="PACMAN: Attacking ARM Pointer Authentication with Speculative Execution"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-28 15:30" pubdate>
+          June 28, 2022 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          8.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          75 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">PACMAN: Attacking ARM Pointer Authentication with Speculative Execution</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>paper: <a target="_blank" rel="noopener" href="https://pacmanattack.com/paper.pdf">https://pacmanattack.com/paper.pdf</a></p>
+</blockquote>
+<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><p>這篇 paper 提出新的攻擊方式叫做 PACMAN，結合 memory corruption 漏洞和 speculative excution 漏洞的攻擊，利用 side channels 在不造成 crash 的情況下 speculatively leaks PAC verification，並在 Apple M1 SoC (第一個支援 ARM Pointer Authentication 的個人電腦處理器) 上成功利用。</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>PACMAN 主要是個跟硬體有關的攻擊，先前曾經有像是 Meltdown 和 Spectre 也都是和硬體有關的漏洞，這個 PACMAN 主要就是攻擊 speculative exection (推測執行)這個特性來 bypass ARM 的 pointer 驗證</p>
+<h3 id="ARM-Pointer-Authentication"><a href="#ARM-Pointer-Authentication" class="headerlink" title="ARM Pointer Authentication"></a>ARM Pointer Authentication</h3><p>一般在做 memory 相關的攻擊時，常常會要控制 data pointer 然後控執行流程，所以 ARM 就有提供 Pointer Authentication (PA) 來保護 pointer 不被亂動，有了這個保護機制讓竄改 pointer 不被發現變很難。</p>
+<p>通常實際的 address space 在 64-bit 架構下是小於 64 bits 的，所以沒用到的 bits 就能拿來存一個 hash 值 (Pointer Authentication Code PAC) 來保護 pointer，若用 pointer 的時候 PAC 不對程式就會 crash 掉。</p>
+<p>PAC 可以小到 11 bits 大到 31 bits (看系統設定)，不過即使很小也不太可能被暴力破解，因為 crash 掉之後重啟就會用新的 secret key，而且太頻繁 crash 掉也容易被發現。</p>
+<h3 id="Key-Challenge"><a href="#Key-Challenge" class="headerlink" title="Key Challenge"></a>Key Challenge</h3><p>在 Apple 上研究的難點</p>
+<ul>
+<li>很少關於他們 micro-architectural 的公開文件</li>
+<li>by default, to not expose a high-resolution timer to userspace<ul>
+<li>(說是對微架構逆向很重要)</li>
+</ul>
+</li>
+</ul>
+<h3 id="Contributions"><a href="#Contributions" class="headerlink" title="Contributions"></a>Contributions</h3><ul>
+<li>propose the PACMAN attack</li>
+<li>develop micro-architectural timing side-channel attack primitives and a reverse engineering tool for Apple M1 processors</li>
+<li>reverse engineer the TLB organizations and perform the first TLB-based side-channel attack with speculative execution on Apple M1 processors</li>
+<li>show that the PACMAN attack works across privilege levels (We demonstrate several proof-of-concept of PACMAN attacks, including constructing PAC oracles, brute-forcing PACs, and a control-flow hijacking attack targeting a PAenabled kernel module)</li>
+</ul>
+<h3 id="Impact"><a href="#Impact" class="headerlink" title="Impact"></a>Impact</h3><ul>
+<li>業界，可以影響所有有用上現有 PAC 設計的 ARM 處理器</li>
+<li>學術，很多 based on memory 安全前提的論文和假設都可以被推翻，有必要變動 threat mode 重新評估</li>
+<li>highlights that security mechanisms that employ a securityby-crash design principle and rely on low collision probability are potentially vulnerable to speculative execution attacks</li>
+<li>speculation can serve as a primitive to suppress crashes</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="Memory-Corruption-Vulnerabilities"><a href="#Memory-Corruption-Vulnerabilities" class="headerlink" title="Memory Corruption Vulnerabilities"></a>Memory Corruption Vulnerabilities</h3><p>在低階語言寫的軟體中出現，包括</p>
+<ul>
+<li>out-of-bound writes</li>
+<li>out-of-bound read</li>
+<li>use-after-free</li>
+<li>doublefree bugs</li>
+<li>integer overflows and underflows</li>
+<li>size confusion attacks</li>
+<li>type confusion attacks</li>
+</ul>
+<p>可以竄改或破壞掉原本 memory 中的東西，像是 data and code pointers，去修改 code pointer 可以改變程式的執行流程，造成嚴重的影響，這又叫做 control-flow hijacking attacks，像是 ROP 和 JOP 都算是。</p>
+<p>常見的保護包括</p>
+<ul>
+<li>stack canaries</li>
+<li>data execution prevention</li>
+<li>ASLR</li>
+<li>kASLR (kernel ASLR)</li>
+</ul>
+<p>雖然提供了保護提升攻擊難度但還是都有被繞過的可能。</p>
+<h3 id="ARM-Pointer-Authentication-1"><a href="#ARM-Pointer-Authentication-1" class="headerlink" title="ARM Pointer Authentication"></a>ARM Pointer Authentication</h3><p>ARMv8.3 開始提供的 overhead 很小的保護機制，保護 pointer 不會被亂改，主要就是去幫 pointer 簽一個 hash，這裡稱為 Pointer Authentication Code (PAC)，在用這個 pointer 之前會先檢查 PAC。</p>
+<h4 id="Signing-and-Verifying-Pointers"><a href="#Signing-and-Verifying-Pointers" class="headerlink" title="Signing and Verifying Pointers"></a>Signing and Verifying Pointers</h4><p>實際上 64 bits 架構的 address space 不會真的用到 64 bits，PA 就會把 PAC 吋在多的沒用到的 bits。<br><img src="https://i.imgur.com/1ME9fSO.png?350x" srcset="/img/loading.gif" lazyload><br>圖中拿來簽hash 的這個 context value 裡面有存在高權限才碰得到的 register 中的 key 和 program-specified salt。</p>
+<h4 id="ISA-Extension"><a href="#ISA-Extension" class="headerlink" title="ISA Extension"></a>ISA Extension</h4><p><img src="https://i.imgur.com/b1DqMo7.png?350x" srcset="/img/loading.gif" lazyload><br>為了提供 PA 功能，PA 提供了兩組 instructions sets 來做這些事</p>
+<ul>
+<li><code>pac</code> 開頭的是做 signing 的工作<ul>
+<li>最多有五組的 key 可以同時硬體記錄著，當次 signing 要用的 key 跟  opcode 有關</li>
+<li>ex. <code>pacia ptr, salt</code></li>
+</ul>
+</li>
+<li><code>aut</code> 則是做驗證</li>
+</ul>
+<p>在 Apple 晶片中除了保護 return address，PAC 也被用來保護很多其他的 data structures，包括 C++ vtable pointers、vtable entries、Objective-C method caches。</p>
+<h3 id="Micro-architectural-Side-Channels"><a href="#Micro-architectural-Side-Channels" class="headerlink" title="Micro-architectural Side Channels"></a>Micro-architectural Side Channels</h3><p>有 shared micro-architectural structures (including caches , TLBs, functional units, and network-on-chips) 都可以被用來 leak 重要資訊</p>
+<h4 id="Prime-Probe"><a href="#Prime-Probe" class="headerlink" title="Prime+Probe"></a>Prime+Probe</h4><ul>
+<li>限制最少的 </li>
+<li>attacker 先把 cache 塞滿，victim 存取過後，attacker 可以再去 access 整個 cache 利用時間差來知道 victim access 了哪些東西</li>
+</ul>
+<h4 id="Flush-Reload"><a href="#Flush-Reload" class="headerlink" title="Flush+Reload"></a>Flush+Reload</h4><ul>
+<li>需要 sharing memory</li>
+<li>先 flush 掉要觀察的 memory 位置，然後等受害者執行完以後再去掃記憶體，就可以由時間差知道那些有被存取過</li>
+<li>Meltdown 與 Spectre 都有用到的</li>
+</ul>
+<h4 id="Evict-Reload"><a href="#Evict-Reload" class="headerlink" title="Evict+Reload"></a>Evict+Reload</h4><ul>
+<li>需要 sharing memory</li>
+<li>類似 Prime+Probe，不過對象是 shared memory</li>
+</ul>
+<h3 id="Speculative-Execution-Attacks"><a href="#Speculative-Execution-Attacks" class="headerlink" title="Speculative Execution Attacks"></a>Speculative Execution Attacks</h3><p>Speculative execution 又翻推測執行，是處理器的一個優化，因為處理器速度很快，所以為了更好的利用資源處理器會偷跑，像是分支預測，他會在分支判斷之前就先猜這次的分支會走哪一條，然後先偷跑，猜對了就可以直接繼續，猜錯了就會到分岔點走正確的路，但這樣的優化反而衍生出一些漏洞。</p>
+<h4 id="Meltdown"><a href="#Meltdown" class="headerlink" title="Meltdown"></a>Meltdown</h4><p>利用 exception 和預先執行，在發生 exception 停下來之前偷跑到後面，load 重要資訊的指令，然後停下。</p>
+<h4 id="Spectre"><a href="#Spectre" class="headerlink" title="Spectre"></a>Spectre</h4><p>conditional branches 或是 indirect branch。</p>
+<h2 id="Threat-Model"><a href="#Threat-Model" class="headerlink" title="Threat Model"></a>Threat Model</h2><ul>
+<li>Target<ul>
+<li>在一個有開 PA 的 victim 上用 PAC oracle 爆出 PAC 成功達成 control flow hijacking attack</li>
+</ul>
+</li>
+<li>Attacker<ul>
+<li>unprivileged userspace application</li>
+</ul>
+</li>
+<li>Victim<ul>
+<li>the operating system kernel</li>
+</ul>
+</li>
+<li>Assumption<ol>
+<li>在 victim program 中有個可以 exploit 的 memory corruption 漏洞，可以讓攻擊者任意寫入 memory</li>
+<li>有開 PA 而且存在 PACMAN gadgets</li>
+<li>可以做 side channel attack (要有high-resolution timer)</li>
+</ol>
+</li>
+</ul>
+<h2 id="The-PACMAN-Attack"><a href="#The-PACMAN-Attack" class="headerlink" title="The PACMAN Attack"></a>The PACMAN Attack</h2><p>主要就是在不造成 crash 的情況下利用 speculative execution attacks 和 micro-architectural side channels 來 leak PAC verification 的結果。</p>
+<h3 id="PACMAN-gadgets"><a href="#PACMAN-gadgets" class="headerlink" title="PACMAN gadgets"></a>PACMAN gadgets</h3><p>有些可以利用的 code patterns 這邊會稱作 PACMAN gadgets，由兩種 operation 組成</p>
+<ul>
+<li>verification<br>  verifies the PAC，給一個 pointer ，然後他會驗證 PAC 是否正確，正確就 output 一個有效的 pointer，錯誤就 output 一個壞的 pointer，執行的時候就會出錯 (前面 Background 有講過)</li>
+<li>transmission<br>  他會預先去執行 verificated 的輸出 (pointer) (可能是個 load&#x2F;store，反正就是預先轉成 physical address 去使用他)，如果過了就會產生可以被觀察到的 side effect (就能經由 side channel 偷相關的資訊)，若預先執行失敗就會有個 speculative exception，而這些因為都是在 mis-speculated branch 之下發生的所有不會造成 crash</li>
+</ul>
+<p>其中 PACMAN gadgets 又分成以下兩種<br><img src="https://i.imgur.com/ggHiYGL.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>Data PACMAN Gadget (圖3c)<ul>
+<li>預先去猜分支做 data accesses 造成的</li>
+<li>AUT: pointer authentication instruction</li>
+<li>guessed_ptr: 攻擊者提供的 pointer</li>
+<li>verified_ptr: AUT 的 output pointer</li>
+<li>觀察有沒有執行 load 還是 exception 的差異來知道 pointer 對不對</li>
+</ul>
+</li>
+<li>Instruction PACMAN Gadget (圖3d)<ul>
+<li>預先去猜分支做 instruction fetches 造成的</li>
+<li>在完成 AUT 之前會使用 branch target buffer (BTB) 預測 BR2 (這在 nested branch 的分支預測中很常見)</li>
+<li>AUT 完成後發現 BR2 預測錯誤所以 eagerly squashes BR2</li>
+<li>fetch 正確的 BR2 (也就是剛剛 AUT 的結果)</li>
+<li>限制:<ul>
+<li>必須支援 eager squashing of nested branches，一定要有第三步的 squash AUT 後的 pointer 才會被用，才能 leak AUT 結果</li>
+<li>需要區分 fetching the verified pointer 和 BTB prediction 的 side effect，以這裡用的 PoC 用的 TLB-based side channel， BTB prediction 和 verified pointer 要在不同 page 才行<br><img src="https://i.imgur.com/X67JkSK.png?400x" srcset="/img/loading.gif" lazyload></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Gadget-Detection"><a href="#Gadget-Detection" class="headerlink" title="Gadget Detection"></a>Gadget Detection</h3><p>用 Ghidra’s scripting API 找 kernel 中 conditional branches，檢查它之後的 32 個 instructions，若驗證後的 pointer 會被用在 transmit instruction (a memory access or a branch instruction) 就視為 PACMAN Gadget。</p>
+<p>在 xnu-8019.80.24 中找到13867 個 data PACMAN gadgets 和 41292 個 instruction PACMAN gadgets，因為這裡只往後找 32 個指令，所以若再找多一點還說不定更多。</p>
+<h3 id="An-End-to-End-Illustrative-Example"><a href="#An-End-to-End-Illustrative-Example" class="headerlink" title="An End-to-End Illustrative Example"></a>An End-to-End Illustrative Example</h3><p><img src="https://i.imgur.com/s62UYtI.png?450x" srcset="/img/loading.gif" lazyload><br>有個 BoF 可以蓋到 function pointer。</p>
+<ol>
+<li>先正常執行程式，train BTB 和 branch predictor (cond &#x3D; true)</li>
+<li>BoF 竄改 fp，猜 PAC 直到猜中 (cond &#x3D; false，不真的進 branch，而是讓它 speculative 跑進 branch，不會造成 crach)</li>
+<li>最後用猜到的 PAC 成功利用 (con &#x3D; true)</li>
+</ol>
+<h2 id="Attack-Platform"><a href="#Attack-Platform" class="headerlink" title="Attack Platform"></a>Attack Platform</h2><ul>
+<li>Apple M1 SoC<ul>
+<li>第一個支援 ARMv8.3 extensions (包括 PA) 的 aarch64 桌面版本 </li>
+<li>EL0 : usermode programs 執行的地方</li>
+<li>EL1 : kernel 執行的地方</li>
+</ul>
+</li>
+<li>macOS and XNU Kernel<ul>
+<li>OS : macOS</li>
+<li>XNU Kernel<ul>
+<li>有 loadable kernel extensions -&gt; kexts</li>
+<li>在後面他們做 reverse 的時候會用到</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>上述的東西都是沒有 opensource 的而且也沒什麼文件，所以需要做 Reverse 來得到一些需要的資訊，這也是這篇論文其中一大 contribution。</p>
+<h2 id="Reverse-Engineering-Tools"><a href="#Reverse-Engineering-Tools" class="headerlink" title="Reverse Engineering Tools"></a>Reverse Engineering Tools</h2><h3 id="High-Resolution-Timers"><a href="#High-Resolution-Timers" class="headerlink" title="High-Resolution Timers"></a>High-Resolution Timers</h3><p>前面有提到 side channel attack (Prime+Probe)，這種攻擊需要比較精準的時間，所以他們找出 M1 中有那些 timer 可以使用。<br><img src="https://i.imgur.com/uSi0SoO.png?450x" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>CNTPCT_EL0<ul>
+<li>System Counter，所有的 core 都用共享這個 counter 但是 24 MHz 太低了，沒辦法很精準地觀察到有沒有 cache hit&#x2F;miss 這種差異</li>
+</ul>
+</li>
+<li>PMCCNTR_EL0<ul>
+<li>ARM Cycle Count Register，大多 ARM Cortex 處理器都有 performance monitoring units (PMU)，就會有這個 counter，但 M1 的 PMU 不是 standard PMU 所以沒有</li>
+</ul>
+</li>
+<li>PMC0<ul>
+<li>沒有文件提到的，count cycle，另外還有一個 PMC1 count instruction，但都不是 userspace 可以碰到的</li>
+<li>為了可以使用到，他們用了剛剛提到的 kext 修改一個控制的 register PMCR0 來讓 PMC0 可以被 userspace 碰到 (但這是為了 reverse engineering 用的兒部會在攻擊中用到)</li>
+</ul>
+</li>
+<li>Custom Multi-thread Timer<ul>
+<li>自己做了一個不需要 kext 的 userspace accesible timer，做法像這樣<br>  <img src="https://i.imgur.com/jxtNlZS.png?450x" srcset="/img/loading.gif" lazyload></li>
+<li>isb 是控制流程用的，但是後來發現不加變動會稍微變大，但時間的精細度會高一點所以最後還是拿掉了</li>
+</ul>
+</li>
+</ul>
+<h3 id="PacmanOS"><a href="#PacmanOS" class="headerlink" title="PacmanOS"></a>PacmanOS</h3><p>用 Rust 寫的，可以在 M1 上跑的 bare mental 環境，可以讓他們完全控制整個環境，包括硬體、其他干擾等等方便跑實驗。</p>
+<h2 id="Reverse-Engineering"><a href="#Reverse-Engineering" class="headerlink" title="Reverse Engineering"></a>Reverse Engineering</h2><h3 id="Basic-Memory-Hierarchy-Information"><a href="#Basic-Memory-Hierarchy-Information" class="headerlink" title="Basic Memory Hierarchy Information"></a>Basic Memory Hierarchy Information</h3><p><img src="https://i.imgur.com/9qEmBjx.png?500x" srcset="/img/loading.gif" lazyload></p>
+<p>M1 用 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ARM_big.LITTLE">big.LITTLE</a> design</p>
+<blockquote>
+<p>big.LITTLE: ARM 提出的把運算能力比較強的 big core 和比較弱但較不耗電的 little core 結合在一起的組合，這裡用 p-core (Performance) 和 e-core (Efficient) 分別稱呼 big 和 little，但這是 intel 的命名</p>
+</blockquote>
+<p>M1 memory 有兩層的 cache，不同 core 的 size 不一樣，然後 kernel 用 48 bits 的 virtual address 和 16 bit 的 PAC。</p>
+<h3 id="L1-Data-TLB-and-L2-TLB"><a href="#L1-Data-TLB-and-L2-TLB" class="headerlink" title="L1 Data TLB and L2 TLB"></a>L1 Data TLB and L2 TLB</h3><p>主要研究 p-core 的行為，因為在 p-core 上的 speculative 行為會比較可靠，但不像 Linux 有可以直接指定要用哪個 core 執行的 API (<code>taskset</code>)，他們用 <code>pthread_set_qos_class_self_np</code> 來 “建議” kernel 用哪個 core，然後用到的 counter 是會需要 kext 的那個 PCM0。</p>
+<p>做的實驗就是用 Prime+Probe 來測量 TLB 的 size，主要步驟就是</p>
+<ol>
+<li>load 某個 address</li>
+<li>load N 個 address 來把 TLB 塞滿</li>
+<li>再 load 一次最一開始 load 的那個 address，測量 latency</li>
+</ol>
+<p><img src="https://i.imgur.com/kht8qCB.png" srcset="/img/loading.gif" lazyload></p>
+<p>最後得到 (a) 圖，可以看出每一次的差距都是 TLB size 的臨界 (L1 dTLB&#x2F;L2 TLB)，雖然無法斷言 cache 設計是不是真的就跟推測的一樣但至少可以知道怎麼樣才能填滿 TLB</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs !">1) To evict a page table entry from the L1 dTLB, we can create an eviction set with 12 or more addresses with a stride of 256×16KB.<br>2) To evict a page table entry from the L2 TLB, we can create an eviction set with 23 or more addresses with a stride of 2048×16KB.<br></code></pre></td></tr></table></figure>
+
+<p>至於 TLB conflicts and cache conflicts 則用不同 load N 個 address 的 address 算法測量，得到 (b) 圖 (L1 cache&#x2F;L2 cache&#x2F;L1 dTLB&#x2F;L2 TLB)</p>
+<h3 id="L1-Instruction-TLB"><a href="#L1-Instruction-TLB" class="headerlink" title="L1 Instruction TLB"></a>L1 Instruction TLB</h3><ol>
+<li>先把 L1 dTLB 和 L2 TLB 都填滿</li>
+<li>branch 到某個 address</li>
+<li>執行 N 個 branch 把 iTLB 填滿 (稱為 instruction eviction set)</li>
+<li>Load 第 2 步的那個 address，測量 latency (為什麼是 “load” 得到 data access 的 latency 下面會解釋)</li>
+</ol>
+<p>得到的結果是圖 c，解釋結果之前先講一下他們推論的整個 TLB 架構</p>
+<p><img src="https://i.imgur.com/TrUiXAy.png?500x" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>user 和 kernel 的 L1 iTLB 並不共享，userspace 無法觀察到 kernel space 的差異</li>
+<li>L1 dTLB 是 L1 iTLB 的 non-inclusive backing-store，iTLB 塞滿了就會被塞到 dTLB 去，這就是為什麼剛剛測量的步驟 4 是用 “load” 測量 data access 的 latency</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs !">3) To evict a page table entry from the L1 iTLB, we can create an eviction set with 4 or more branch instructions with a stride of 32×16KB.<br></code></pre></td></tr></table></figure>
+
+<h3 id="Summary-of-Reverse-Engineering-Results"><a href="#Summary-of-Reverse-Engineering-Results" class="headerlink" title="Summary of Reverse Engineering Results"></a>Summary of Reverse Engineering Results</h3><ul>
+<li>先把 iTLB 填滿之後就能填到 dTLB</li>
+</ul>
+<p><img src="https://i.imgur.com/3PrxiYJ.png?500x" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>不管是用 PMC0 或 Multi-thread Counter 都可以清楚分出有沒有 TLB hit、cache hit 的差別</li>
+</ul>
+<h2 id="Proof-of-Concept-Attacks"><a href="#Proof-of-Concept-Attacks" class="headerlink" title="Proof-of-Concept Attacks"></a>Proof-of-Concept Attacks</h2><h3 id="PAC-Oracles"><a href="#PAC-Oracles" class="headerlink" title="PAC Oracles"></a>PAC Oracles</h3><p>實驗中他們裝個有可以用 syscall trigger PACMAN gadget 的 kext，然後傳一堆有正確 PAC 的 pointer 和沒有 PAC 的 pointer 測試然後用他們定義的那個 counter 測量時間，然後分別用 data access 和 instruction fetch 兩種方式來 leak PAC 是否正確<br><img src="https://i.imgur.com/jnGA7tw.png?500x" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>Leaking via Data Accesses<ul>
+<li>因為 dTLB user 和 kernel 共享，所以可以直接測</li>
+</ul>
+<ol>
+<li>先 train PACMAN gadget 的 branch predictor (64 次)</li>
+<li>Reset the TLB</li>
+<li>Prime the L1 dTLB</li>
+<li>Trigger the PACMAN gadget by passing in the pointer with the PAC to test</li>
+<li>Probe the L1 dTLB set by re-accessing the eviction set and report the number of L1 dTLB misses</li>
+</ol>
+</li>
+<li>Leaking via Instruction Fetches<ul>
+<li>kernelspace 和 userspace 的 L1 iTLBs 不共享，所以從 userspace 觸發 kernelspace 的 self-conflicts，然後塞滿它的 iTLB 進而塞到 dTLB (共享的)</li>
+<li>前面步驟都跟 data access 一樣</li>
+</ul>
+<ol start="5">
+<li>用塞滿 iTLB 的 set 去塞塞看</li>
+<li>最後檢查有沒有塞到 dTLB 去就知道有沒有 miss 了</li>
+</ol>
+</li>
+</ul>
+<h3 id="Brute-Force-Attack"><a href="#Brute-Force-Attack" class="headerlink" title="Brute-Force Attack"></a>Brute-Force Attack</h3><ul>
+<li>Attack Speed<ul>
+<li>M1 uses a 16-bit PAC</li>
+<li>2.94 minutes on average 試玩所有可能的 PAC values</li>
+<li>主要花時間的是 train predicter 時的 syscall，可以縮短但非必要</li>
+</ul>
+</li>
+<li>Attack Accuracy<ul>
+<li>noisy environment</li>
+<li>90% correct PAC (45)</li>
+<li>10% no PAC value was found (5)</li>
+<li>沒有 false Positive (找錯 PAC)</li>
+</ul>
+</li>
+</ul>
+<h3 id="Jump2Win-Attack"><a href="#Jump2Win-Attack" class="headerlink" title="Jump2Win Attack"></a>Jump2Win Attack</h3><p>有 PAC 就能單純的去利用漏洞了<br><img src="https://i.imgur.com/ryxncvG.png?500x" srcset="/img/loading.gif" lazyload><br><img src="https://i.imgur.com/NgeVvd3.png?500x" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Contermeasures"><a href="#Contermeasures" class="headerlink" title="Contermeasures"></a>Contermeasures</h2><ul>
+<li>explore PAC-agnostic execution<ul>
+<li>修改架構或軟體來確保 PAC 不會在 speculation 的時候被驗證並使用</li>
+<li>speculative execution 在 memory access  和 branch 要用驗證後的 pointer 時暫停下來<ul>
+<li><code>fence</code>&#x2F;<code>isb</code></li>
+<li>效能變差</li>
+</ul>
+</li>
+<li>預先執行的時候總是假設 PAC 會過<ul>
+<li>預先執行 invalid pointers 可能造成 Meltdown-style vulnerability</li>
+<li>需要和 Meltdown 的 mitigation 配合</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>用防範 Spectre 的方法改良<ul>
+<li>讓 speculative load 沒辦法被觀測到<ul>
+<li>Invisible speculation mechanisms</li>
+<li>such as InvisiSpec, SafeSpec, and Delay-on-Miss</li>
+</ul>
+</li>
+<li>利用 information flow tracking 來防止 leaking speculatively accessed secret<ul>
+<li>STT, NDA, and Dolma </li>
+<li>taint pointer authentication instruction</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>別寫出有 memory corruption 洞的程式</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/paper/" class="category-chain-item">paper</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/paper/">#paper</a>
+      
+        <a href="/tags/security/">#security</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>PACMAN: Attacking ARM Pointer Authentication with Speculative Execution</div>
+      <div>https://wiiwu959.github.io/2022/06/28/2022-06-28-PACMAN/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>June 28, 2022</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/03/08/2022-03-07-CVE-2021-3129/" title="CVE-2021-3129 Laravel debug mode: Remote code execution">
+                        <span class="hidden-mobile">CVE-2021-3129 Laravel debug mode: Remote code execution</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/js/hexo_resize_image.js"></script>
+<!-- hexo injector body_end end --></body>
+</html>

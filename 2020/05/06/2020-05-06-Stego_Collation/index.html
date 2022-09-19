@@ -1,0 +1,681 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="作為一個 CTF 垃圾菜雞，每次下手都只能從別人可能根本不屑的misc開始看能不能撿些分數，最近想說仔細把 Stego 的套路都熟悉一下，下次撿分的時候至少不要連 misc 都撿不了，所以讀了一些關於 Stego 套路的文章，這裡稍微整理一下。 隱藏檔案這應該算是很容易被發現的一個套路，把檔案藏在圖片裡，原理是讀圖片的工具通常遇到 ‘FF D9’ 結尾就會把它當成 jpg 檔了，所以接在他後面的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="忍術隱寫の術">
+<meta property="og:url" content="https://wiiwu959.github.io/2020/05/06/2020-05-06-Stego_Collation/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="作為一個 CTF 垃圾菜雞，每次下手都只能從別人可能根本不屑的misc開始看能不能撿些分數，最近想說仔細把 Stego 的套路都熟悉一下，下次撿分的時候至少不要連 misc 都撿不了，所以讀了一些關於 Stego 套路的文章，這裡稍微整理一下。 隱藏檔案這應該算是很容易被發現的一個套路，把檔案藏在圖片裡，原理是讀圖片的工具通常遇到 ‘FF D9’ 結尾就會把它當成 jpg 檔了，所以接在他後面的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.imgur.com/Aqmtivw.jpg">
+<meta property="og:image" content="https://i.imgur.com/fY8DFmJ.jpg">
+<meta property="og:image" content="https://i.imgur.com/Sen9lMs.png">
+<meta property="og:image" content="https://i.imgur.com/f4xAb7P.png">
+<meta property="article:published_time" content="2020-05-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-19T07:18:30.952Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="misc">
+<meta property="article:tag" content="stego">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.imgur.com/Aqmtivw.jpg">
+  
+  
+  
+  <title>忍術隱寫の術 - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"wiiwu959.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="忍術隱寫の術"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-05-06 00:00" pubdate>
+          May 6, 2020 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">忍術隱寫の術</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>作為一個 CTF 垃圾菜雞，每次下手都只能從別人可能根本不屑的misc開始看能不能撿些分數，最近想說仔細把 Stego 的套路都熟悉一下，下次撿分的時候至少不要連 misc 都撿不了，所以讀了一些關於 Stego 套路的文章，這裡稍微整理一下。</p>
+<h2 id="隱藏檔案"><a href="#隱藏檔案" class="headerlink" title="隱藏檔案"></a>隱藏檔案</h2><p>這應該算是很容易被發現的一個套路，把檔案藏在圖片裡，原理是讀圖片的工具通常遇到 ‘FF D9’ 結尾就會把它當成 jpg 檔了，所以接在他後面的 data 它也不管，圖片也就能正常顯示，把副檔名改成 zip 就能變回壓縮檔了，只是覺得滿有趣所以記一下。<br><img src="https://i.imgur.com/Aqmtivw.jpg" srcset="/img/loading.gif" lazyload><br>在 windows 裡面可以直接用 <code>copy /b a.jpg+b.zip output.jpg</code> 做出來，在 linux 裡也可以用 <code>cat a.jpg b.zip &gt; output.jpg</code> 做到。<br>遇到這種只要用 winhex 開起來看看就會發現後面還有東西了，或是用 binwalk 也可以輕易被發現。<br><img src="https://i.imgur.com/fY8DFmJ.jpg" srcset="/img/loading.gif" lazyload><br>那如果需要把隱藏的東西，或是合在同一個檔案的東西拆開來有幾種方式。</p>
+<ul>
+<li>winhex 把要擷取的地方選起來，右鍵Edit-&gt;Copy Block-&gt;Into New File</li>
+<li><a target="_blank" rel="noopener" href="https://code.yidas.com/linux-dd-command-test-io/">dd</a> <code>dd if=[input] of=[output] skip=[ 從哪個byte開始做 ] bs=1</code></li>
+<li>foremost <code>foremost [pic]</code></li>
+</ul>
+<h2 id="LSB-Least-Significant-Bit"><a href="#LSB-Least-Significant-Bit" class="headerlink" title="LSB(Least Significant Bit)"></a>LSB(Least Significant Bit)</h2><p>把訊息藏在圖片的數據後面，在 CTF 裡面遇到過，都用 <a target="_blank" rel="noopener" href="http://www.caesum.com/handbook/Stegsolve.jar">stegsolve</a> 直接解決的，每個 pixel 都是三原色組成的，每個顏色 8bits，如果只改了最後一個 bit，通常是看不太出來的，所以可以把訊息藏在最後一個 bit 裡，用 ascii 或是只用這一 bits 組成不同的圖案來隱藏訊息，這種作法 jpg 是做不到的，因為 jpg 會壓縮圖片，這些隱藏訊息就可能被破壞了，png 和 bmp 才有可能用上這套路。<br>順帶一提遇到 QRcode 或是條碼都可以用這個<a target="_blank" rel="noopener" href="https://online-barcode-reader.inliteresearch.com/">網站</a>來掃。</p>
+<h2 id="檔案修復"><a href="#檔案修復" class="headerlink" title="檔案修復"></a>檔案修復</h2><p>有時候是給的圖片壞掉了要去修，這種時候需要稍微知到一下各種檔案的結構會比較好，不過常常都是開頭的地方出錯而已，用編輯器修好就好了。<br>有時候是需要改圖片的長寬，把它改大一點就能看到被藏起來的部分了。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://my.oschina.net/ososchina/blog/801358">PNG</a></li>
+<li><a target="_blank" rel="noopener" href="https://dev.gameres.com/Program/Visual/Other%20/GIFDoc.htm">GIF</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/blues1021/article/details/45422557">JPG</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Magic_number_%28programming%29#Magic_numbers_in_files">Magic Number in File</a></li>
+</ul>
+<h2 id="metadata"><a href="#metadata" class="headerlink" title="metadata"></a>metadata</h2><p>有時候訊息會直接藏在圖片的 metadata，可以用 windows 的右鍵內容直接看到，或是在 linux 下可以 <code>exiftool</code> 來查看，也可以直接丟到<a target="_blank" rel="noopener" href="https://www.metadata2go.com/">線上</a>處理。<br>像是 picoCTF 2018 的 Truly an Artist。<br><img src="https://i.imgur.com/Sen9lMs.png" srcset="/img/loading.gif" lazyload><br><img src="https://i.imgur.com/f4xAb7P.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="雙圖"><a href="#雙圖" class="headerlink" title="雙圖"></a>雙圖</h2><p>通常會給兩張圖的，就會需要比較兩張圖的差異，可能會是 XOR&#x2F;SUB&#x2F;AND&#x2F;OR&#x2F;MUL 不一定，可以善用 stegsolve 裡面的 Analysis-&gt;Image Combiner 處理。<br>有時候會是需要比較 data 內的差異，抓出有問題的 data 段來分析。</p>
+<h2 id="Blind-WaterMark"><a href="#Blind-WaterMark" class="headerlink" title="Blind WaterMark"></a>Blind WaterMark</h2><p><a target="_blank" rel="noopener" href="https://github.com/chishaxie/BlindWaterMark">腳本和說明</a><br>除了圖片以外，音檔、pdf、pcap 也都可以藏東西，之後只要有遇到相關的題目會再回來補上。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://appleu0.sinaapp.com/?p=501">隐写术总结</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/30539398">【从零开始学CTF】5、CTF中的隐写术</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.splitline.tw/2018/12/07/stego-tricks.html">那些Stego題的套路</a></li>
+<li><a target="_blank" rel="noopener" href="https://hackfun.org/2017/01/12/CTF%E4%B8%AD%E5%9B%BE%E7%89%87%E9%9A%90%E8%97%8F%E6%96%87%E4%BB%B6%E5%88%86%E7%A6%BB%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/">CTF中图片隐藏文件分离方法总结</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/note/" class="category-chain-item">note</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/CTF/">#CTF</a>
+      
+        <a href="/tags/misc/">#misc</a>
+      
+        <a href="/tags/stego/">#stego</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>忍術隱寫の術</div>
+      <div>https://wiiwu959.github.io/2020/05/06/2020-05-06-Stego_Collation/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>May 6, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/02/2020-07-02-Scrape_Learn/" title="Web Crawler Note">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Web Crawler Note</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/12/09/2019-12-09-OS-HW3-2019/" title="CSIE--NachOS-HW3">
+                        <span class="hidden-mobile">CSIE--NachOS-HW3</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/js/hexo_resize_image.js"></script>
+<!-- hexo injector body_end end --></body>
+</html>

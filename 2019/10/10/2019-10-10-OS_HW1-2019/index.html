@@ -1,0 +1,695 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="第一次碰 OS 相關的東西，超級不熟，怕之後會忘記所以紀錄一下參考了很多學長的 blog 一邊試才寫出來的第一次作業 orz 要再花時間把架構搞清楚一點才行主要參考這兩個 blog : Terry Nini OS::NachOS::HW1 Morris Blog 向 NachOS 4.0 作業進發 (1) 初始作業Install說是要跑在 ubuntu 14.04 (32 bit) 或更舊的版本才">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSIE--NachOS-HW1">
+<meta property="og:url" content="https://wiiwu959.github.io/2019/10/10/2019-10-10-OS_HW1-2019/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="第一次碰 OS 相關的東西，超級不熟，怕之後會忘記所以紀錄一下參考了很多學長的 blog 一邊試才寫出來的第一次作業 orz 要再花時間把架構搞清楚一點才行主要參考這兩個 blog : Terry Nini OS::NachOS::HW1 Morris Blog 向 NachOS 4.0 作業進發 (1) 初始作業Install說是要跑在 ubuntu 14.04 (32 bit) 或更舊的版本才">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-10-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-19T07:18:30.952Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="OS">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>CSIE--NachOS-HW1 - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"wiiwu959.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSIE--NachOS-HW1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-10-10 00:00" pubdate>
+          October 10, 2019 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          9.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          80 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSIE--NachOS-HW1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>第一次碰 OS 相關的東西，超級不熟，怕之後會忘記所以紀錄一下<br>參考了很多學長的 blog 一邊試才寫出來的第一次作業 orz 要再花時間把架構搞清楚一點才行<br>主要參考這兩個 blog :</p>
+<p><a target="_blank" rel="noopener" href="http://blog.terrynini.tw/tw/OS-NachOS-HW1/">Terry Nini OS::NachOS::HW1</a></p>
+<p><a target="_blank" rel="noopener" href="https://morris821028.github.io/2014/05/24/lesson/hw-nachos4/">Morris Blog 向 NachOS 4.0 作業進發 (1)</a></p>
+<h1 id="初始作業"><a href="#初始作業" class="headerlink" title="初始作業"></a>初始作業</h1><h2 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h2><p>說是要跑在 ubuntu 14.04 (32 bit) 或更舊的版本才行，不然就要另外去 patch，真的是比 14.04 新一點都會出問題，我一開始載到 14.04.1 就卡關到不行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ sudo apt install git csh g++<br>$ git <span class="hljs-built_in">clone</span> https://github.com/connlabtw/NachOS.git<br>$ <span class="hljs-built_in">cd</span> NachOS<br>$ sudo <span class="hljs-built_in">cp</span> -r usr /<br>$ <span class="hljs-built_in">cd</span> code<br>$ make<br></code></pre></td></tr></table></figure>
+
+<h2 id="Test"><a href="#Test" class="headerlink" title="Test"></a>Test</h2><p>然後就能來測試能不能正常運行了<br>進到 NachOS&#x2F;code&#x2F;userprog 裡面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ ./nachos –e ../test/test1<br></code></pre></td></tr></table></figure>
+<p>如果正常就應該能看到這樣的結果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash">Total threads number is 1<br>Thread ../test/test1 is executing.<br>Print <span class="hljs-built_in">integer</span>:9<br>Print <span class="hljs-built_in">integer</span>:8<br>Print <span class="hljs-built_in">integer</span>:7<br>Print <span class="hljs-built_in">integer</span>:6<br><span class="hljs-built_in">return</span> value:0<br>No threads ready or runnable, and no pending interrupts.<br>Assuming the program completed.<br>Machine halting!<br><br>Ticks: total 200, idle 66, system 40, user 94<br>Disk I/O: reads 0, writes 0<br>Console I/O: reads 0, writes 0<br>Paging: faults 0<br>Network I/O: packets received 0, sent 0<br></code></pre></td></tr></table></figure>
+<p>我照網路上也去試試同時跑兩個 process (要記得先去 Makefile 裡面加上 test2 再 make test2)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ ./nachos -e ../test/test1 -e ../test/test2<br></code></pre></td></tr></table></figure>
+<h1 id="MultiProgramming"><a href="#MultiProgramming" class="headerlink" title="MultiProgramming"></a>MultiProgramming</h1><p>看了很多 blog 都有提到這問題，我一開始卻沒遇到，我才剛慶幸我沒有遇到這問題結果在測試我的 Sleep() 就遇到了，有夠…</p>
+<p>反正當我想同時跑兩個不同時間的 Sleep() 並交互使用 PrintInt 時發現這兩個 thread 竟然互相干擾，我只想印十遍的內容竟然重複了近三十遍，每到記數變數 i 快要接近終結的 10 時，都會跳掉，很明顯就是兩個 thread 用到同一塊記憶體了，所以以下就是根據 Morris 的 blog 改的</p>
+<p>code&#x2F;userprog&#x2F;addrspace.h</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">AddrSpace</span> &#123;<br>  <span class="hljs-keyword">public</span>:<br>    ...<br>    <span class="hljs-comment">//加上這一行</span><br>    <span class="hljs-type">static</span> <span class="hljs-type">bool</span> usedPhyPage[NumPhysPages];<br>  <span class="hljs-keyword">private</span>:<br>    ...<br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>code&#x2F;usrprog&#x2F;addrspace.cc<br>加上這一行宣告+初始化</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-type">bool</span> AddrSpace::usedPhyPage[NumPhysPages] = &#123;<span class="hljs-number">0</span>&#125;;<br></code></pre></td></tr></table></figure>
+<p>釋放資源</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c++">AddrSpace::~<span class="hljs-built_in">AddrSpace</span>()<br>&#123;<br>    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; numPages; i++)<br>        AddrSpace::usedPhyPage[pageTable[i].physicalPage] = <span class="hljs-literal">false</span>;<br>   <span class="hljs-keyword">delete</span> pageTable;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>也是在 code&#x2F;userprog&#x2F;addrspace.cc 改上這一部分<br>主要就是找到能用的 page、算出進入點。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">AddrSpace::Load</span><span class="hljs-params">(<span class="hljs-type">char</span> *fileName)</span> </span>&#123;<br>    OpenFile *executable = kernel-&gt;fileSystem-&gt;<span class="hljs-built_in">Open</span>(fileName);<br>    NoffHeader noffH;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> size;<br>    <span class="hljs-keyword">if</span> (executable == <span class="hljs-literal">NULL</span>) &#123;<br>    cerr &lt;&lt; <span class="hljs-string">&quot;Unable to open file &quot;</span> &lt;&lt; fileName &lt;&lt; <span class="hljs-string">&quot;\n&quot;</span>;<br>    <span class="hljs-keyword">return</span> FALSE;<br>    &#125;<br>    executable-&gt;<span class="hljs-built_in">ReadAt</span>((<span class="hljs-type">char</span> *)&amp;noffH, <span class="hljs-built_in">sizeof</span>(noffH), <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">if</span> ((noffH.noffMagic != NOFFMAGIC) &amp;&amp; <br>        (<span class="hljs-built_in">WordToHost</span>(noffH.noffMagic) == NOFFMAGIC))<br>     <span class="hljs-built_in">SwapHeader</span>(&amp;noffH);<br>    <span class="hljs-built_in">ASSERT</span>(noffH.noffMagic == NOFFMAGIC);<br><span class="hljs-comment">// how big is address space?</span><br>    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size <br>            + UserStackSize; <span class="hljs-comment">// we need to increase the size</span><br>                        <span class="hljs-comment">// to leave room for the stack</span><br>    numPages = <span class="hljs-built_in">divRoundUp</span>(size, PageSize);<br><span class="hljs-comment">// cout &lt;&lt; &quot;number of pages of &quot; &lt;&lt; fileName&lt;&lt; &quot; is &quot;&lt;&lt; numPages &lt;&lt; endl;</span><br><span class="hljs-comment">/////////////////////////加上這一段////////////////////////////////////////</span><br>    pageTable = <span class="hljs-keyword">new</span> TranslationEntry[numPages];<br>    <span class="hljs-keyword">for</span>(<span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> i = <span class="hljs-number">0</span>, j = <span class="hljs-number">0</span>; i &lt; numPages; i++) &#123;<br>        pageTable[i].virtualPage = i;<br>        <br>        <span class="hljs-comment">// 這裡是指一直往下找到沒有被用過的page為止</span><br>        <span class="hljs-keyword">while</span>(j &lt; NumPhysPages &amp;&amp; AddrSpace::usedPhyPage[j] == <span class="hljs-literal">true</span>)<br>            j++;<br>        <span class="hljs-comment">// 找到以後就用這個沒被用過的page了</span><br>        AddrSpace::usedPhyPage[j] = <span class="hljs-literal">true</span>;<br>        pageTable[i].physicalPage = j;<br>        pageTable[i].valid = <span class="hljs-literal">true</span>;<br>        pageTable[i].use = <span class="hljs-literal">false</span>;<br>        pageTable[i].dirty = <span class="hljs-literal">false</span>;<br>        pageTable[i].readOnly = <span class="hljs-literal">false</span>;<br>    &#125;<br><span class="hljs-comment">////////////////////////////////////////////////////////////////////////</span><br>    size = numPages * PageSize;<br>    <span class="hljs-built_in">ASSERT</span>(numPages &lt;= NumPhysPages);  <span class="hljs-comment">// check we&#x27;re not trying</span><br>                        <span class="hljs-comment">// to run anything too big --</span><br>                        <span class="hljs-comment">// at least until we have</span><br>                        <span class="hljs-comment">// virtual memory</span><br>    <span class="hljs-built_in">DEBUG</span>(dbgAddr, <span class="hljs-string">&quot;Initializing address space: &quot;</span> &lt;&lt; numPages &lt;&lt; <span class="hljs-string">&quot;, &quot;</span> &lt;&lt; size);<br><span class="hljs-comment">// then, copy in the code and data segments into memory</span><br>    <span class="hljs-keyword">if</span> (noffH.code.size &gt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">DEBUG</span>(dbgAddr, <span class="hljs-string">&quot;Initializing code segment.&quot;</span>);<br>    <span class="hljs-built_in">DEBUG</span>(dbgAddr, noffH.code.virtualAddr &lt;&lt; <span class="hljs-string">&quot;, &quot;</span> &lt;&lt; noffH.code.size);<br><span class="hljs-comment">// 這裡更改mainmemory中的項次</span><br><span class="hljs-comment">// 主要做的就是先算出第幾頁，然後乘上 PageSize 就是 page base，而 page offset 則是 code.address % PageSize</span><br><span class="hljs-comment">// offset + base 就是進入點了</span><br>         executable-&gt;<span class="hljs-built_in">ReadAt</span>(<br>        &amp;(kernel-&gt;machine-&gt;mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]), <br>            noffH.code.size, noffH.code.inFileAddr);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (noffH.initData.size &gt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">DEBUG</span>(dbgAddr, <span class="hljs-string">&quot;Initializing data segment.&quot;</span>);<br>    <span class="hljs-built_in">DEBUG</span>(dbgAddr, noffH.initData.virtualAddr &lt;&lt; <span class="hljs-string">&quot;, &quot;</span> &lt;&lt; noffH.initData.size);<br><span class="hljs-comment">// 這裡更改mainmemory中的項次</span><br>        executable-&gt;<span class="hljs-built_in">ReadAt</span>(<br>        &amp;(kernel-&gt;machine-&gt;mainMemory[pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]),<br>            noffH.initData.size, noffH.initData.inFileAddr);<br>    &#125;<br>    <span class="hljs-keyword">delete</span> executable;   <span class="hljs-comment">// close file</span><br>    <span class="hljs-keyword">return</span> TRUE;   <span class="hljs-comment">// success</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="System-Call-example"><a href="#System-Call-example" class="headerlink" title="System Call example"></a>System Call example</h1><p>Slide 裡面有一個實作一個 system call 的 example，只要照著 slide 就能做出一個 system call，和 PrintInt 的功能一樣。<br>到 &#x2F;code&#x2F;userprog&#x2F;syscall.h 加上 define 和宣告</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">define</span> SC_Example 12</span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Example</span><span class="hljs-params">(<span class="hljs-type">int</span> number)</span></span>; <br>/code/userprog/ exception.cc<br><br><span class="hljs-keyword">case</span> SC_Example:<br>    val=kernel-&gt;machine-&gt;<span class="hljs-built_in">ReadRegister</span>(<span class="hljs-number">4</span>);<br>    cout &lt;&lt; <span class="hljs-string">&quot;Example value:&quot;</span> &lt;&lt; val &lt;&lt; endl;<br>    <span class="hljs-keyword">return</span>;<br>/code/test/start.s 加上assembly<br><br>    .globl Example<br>    .ent Example<br>Example:<br>    addiu $<span class="hljs-number">2</span>,$<span class="hljs-number">0</span>,SC_Example<br>    syscall<br>    j $<span class="hljs-number">31</span><br>    .end Example<br></code></pre></td></tr></table></figure>
+<p>到&#x2F;code&#x2F;test裡面加上一個example.c的檔案</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;syscall.h&quot;</span></span><br><span class="hljs-built_in">main</span>()<br>&#123;<br>    <span class="hljs-type">int</span> n;<br>    <span class="hljs-keyword">for</span> (n=<span class="hljs-number">1</span>;n&lt;<span class="hljs-number">5</span>;n++)<br>    <span class="hljs-built_in">Example</span>(n);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>之後 recompile NachOS，然後和之前一樣到 test&#x2F;Makefile 裡面加上 example 然後 make example 之後就能跑起來了<br>順便 Makefile 裡面的格式長這樣</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c++">example: example.o start.o<br>    $(LD) $(LDFLAGS) start.o example.o -o example.coff<br>    ../bin/coff2noff example.coff example<br></code></pre></td></tr></table></figure>
+
+<h1 id="Implement-Sleep"><a href="#Implement-Sleep" class="headerlink" title="Implement Sleep()"></a>Implement Sleep()</h1><p>一開始就先像製造出 Example 一樣的方法<br>到 &#x2F;code&#x2F;userprog&#x2F; syscall.h 加上 define 和宣告</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">define</span> SC_Sleep 12</span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Sleep</span><span class="hljs-params">(<span class="hljs-type">int</span> number)</span></span>; <br></code></pre></td></tr></table></figure>
+<p>slide 中有提到我們需要實作 WaitUntil，所以我們就用 WaitUntil 來達成 Sleep 的效果<br>&#x2F;code&#x2F;userprog&#x2F; exception.cc</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">case</span> SC_Example:<br>    val=kernel-&gt;machine-&gt;<span class="hljs-built_in">ReadRegister</span>(<span class="hljs-number">4</span>);<br>    cout &lt;&lt; <span class="hljs-string">&quot;Sleep time:&quot;</span> &lt;&lt; val &lt;&lt; endl;<br>    kernel-&gt;alarm-&gt;<span class="hljs-built_in">WaitUntil</span>(val);<br>    <span class="hljs-keyword">return</span>;<br></code></pre></td></tr></table></figure>
+<p>&#x2F;code&#x2F;test&#x2F;start.s 加上 assembly，根據理解這裡並不是什麼很底層的組語，只是把我們做的 system call 編號放進 $2 裡面在去 call 他而已</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c++">    .globl Sleep<br>    .ent Sleep<br>Sleep:<br>    addiu $<span class="hljs-number">2</span>,$<span class="hljs-number">0</span>,SC_Sleep<br>    syscall<br>    j $<span class="hljs-number">31</span><br>    .end Sleep<br></code></pre></td></tr></table></figure>
+
+<p>接著就要完成 WaitUntil 了，在 &#x2F;code&#x2F;threads&#x2F;alarm.h 中已經有宣告這個 function 了，要在 &#x2F;code&#x2F;threads&#x2F;alarm.cc 中完成他<br>不過因為還會需要加上一些東西所以還是有動到 &#x2F;code&#x2F;threads&#x2F;alarm.h</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// 多 include 這兩個檔案</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> ALARM_H</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> ALARM_H</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;copyright.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;utility.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;callback.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;timer.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;list&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;thread.h&quot;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">SleepList</span> &#123;<br>    <span class="hljs-keyword">public</span>:<br>        <span class="hljs-built_in">SleepList</span>():<span class="hljs-built_in">counter</span>(<span class="hljs-number">0</span>) &#123;&#125;;<br>        <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">PutToSleep</span><span class="hljs-params">(Thread *t, <span class="hljs-type">int</span> x)</span></span>;<br> <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">PutToReady</span><span class="hljs-params">()</span></span>;<br> <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">IsEmpty</span><span class="hljs-params">()</span></span>;<br>    <span class="hljs-keyword">private</span>:<br>        <span class="hljs-comment">// 包含這個 thread 的 sleep 結束時間的物件</span><br>        <span class="hljs-keyword">class</span> <span class="hljs-title class_">SleepThread</span> &#123;<br>            <span class="hljs-keyword">public</span>:<br>         <span class="hljs-built_in">SleepThread</span>(Thread* t, <span class="hljs-type">int</span> x):<span class="hljs-built_in">sleeper</span>(t), <span class="hljs-built_in">when</span>(x) &#123;&#125;;<br>         Thread* sleeper;<br>         <span class="hljs-type">int</span> when;    <span class="hljs-comment">// 結束時間</span><br>        &#125;;<br>        <span class="hljs-type">int</span> counter;    <span class="hljs-comment">// 這個 counter 是不停累加上去的，每一次呼叫 PutToReady 都會增加</span><br>        std::list&lt;sleepthread&gt; threadlist;    <span class="hljs-comment">// 存放 sleep 中的 thread</span><br>&#125;;<br><br><span class="hljs-comment">// The following class defines a software alarm clock. </span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Alarm</span> : <span class="hljs-keyword">public</span> CallBackObj &#123;<br>  <span class="hljs-keyword">public</span>:<br>    <span class="hljs-built_in">Alarm</span>(<span class="hljs-type">bool</span> doRandomYield); <span class="hljs-comment">// Initialize the timer, and callback </span><br>    <span class="hljs-comment">// to &quot;toCall&quot; every time slice.</span><br>    ~<span class="hljs-built_in">Alarm</span>() &#123; <span class="hljs-keyword">delete</span> timer; &#125;<br>    <br>    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">WaitUntil</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span></span>; <span class="hljs-comment">// suspend execution until time &gt; now + x</span><br>    SleepList sleepList; <span class="hljs-comment">// for implementing Sleep() function.</span><br><br>  <span class="hljs-keyword">private</span>:<br>    Timer *timer;  <span class="hljs-comment">// the hardware timer device</span><br><br>    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CallBack</span><span class="hljs-params">()</span></span>;  <span class="hljs-comment">// called when the hardware</span><br>    <span class="hljs-comment">// timer generates an interrupt</span><br>&#125;;<br><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">// ALARM_H</span></span><br></code></pre></td></tr></table></figure>
+<p>&#x2F;code&#x2F;threads&#x2F;alarm.cc<br>根據 Morris’ Blog，每隔一段時間每隔一段時間 kernal 就會去呼叫一次 Alarm::CallBack()，所以把 PutToReady() 放進去，變成說每次呼叫 CallBack() 都會去檢查有沒有該醒來的 thread，如果有就把他從 sleeplist 裡面踢掉，並丟去 ReadyToRun 裡面</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">void</span> </span><br><span class="hljs-function"><span class="hljs-title">Alarm::CallBack</span><span class="hljs-params">()</span> </span><br><span class="hljs-function"></span>&#123;<br>    Interrupt *interrupt = kernel-&gt;interrupt;<br>    MachineStatus status = interrupt-&gt;<span class="hljs-built_in">getStatus</span>();<br>    <span class="hljs-type">bool</span> woken = sleepList.<span class="hljs-built_in">PutToReady</span>();<br><br>    <span class="hljs-comment">// 多加上兩個條件，一個是檢查是否 woken，一個是檢查還有沒有正在 sleep 的 thread</span><br>    <span class="hljs-comment">// 若是都沒有就可以關掉 timer 了</span><br>    <span class="hljs-keyword">if</span> (status == IdleMode &amp;&amp; !woken &amp;&amp; sleepList.<span class="hljs-built_in">IsEmpty</span>()) &#123; <span class="hljs-comment">// is it time to quit?</span><br>        <span class="hljs-keyword">if</span> (!interrupt-&gt;<span class="hljs-built_in">AnyFutureInterrupts</span>()) &#123;<br>     timer-&gt;<span class="hljs-built_in">Disable</span>(); <span class="hljs-comment">// turn off the timer</span><br> &#125;<br>    &#125; <span class="hljs-keyword">else</span> &#123;   <span class="hljs-comment">// there&#x27;s someone to preempt</span><br> interrupt-&gt;<span class="hljs-built_in">YieldOnReturn</span>();<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// implement WaitUntil function.</span><br><span class="hljs-function"><span class="hljs-type">void</span> </span><br><span class="hljs-function"><span class="hljs-title">Alarm::WaitUntil</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// save previous setting as oldLevel and disable interrupt.</span><br>    <span class="hljs-comment">// SetLevel 是決定這個 thread 能不能被 interrupt</span><br>    <span class="hljs-comment">// 這裡是把原本的 level 存起來然後把當前設定成不能被 interrupt</span><br>    IntStatus oldLevel = kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(IntOff);<br>    Thread* t = kernel-&gt;currentThread;<br>    sleepList.<span class="hljs-built_in">PutToSleep</span>(t, x);               <span class="hljs-comment">// put current thread to sleep list.</span><br>    kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(oldLevel);    <span class="hljs-comment">// recover old interrupt state.</span><br>&#125;<br><br><span class="hljs-comment">// check if there is still thread sleeping</span><br><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">SleepList::IsEmpty</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">return</span> threadlist.<span class="hljs-built_in">size</span>() == <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">// put the thread into sleep list</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SleepList::PutToSleep</span><span class="hljs-params">(Thread*t, <span class="hljs-type">int</span> x)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// check if it cannot be interrupt.</span><br>    <span class="hljs-built_in">ASSERT</span>(kernel-&gt;interrupt-&gt;<span class="hljs-built_in">getLevel</span>() == IntOff);<br>    threadlist.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">SleepThread</span>(t, counter + x));  <span class="hljs-comment">// put into the list</span><br>    t-&gt;<span class="hljs-built_in">Sleep</span>(<span class="hljs-literal">false</span>);<br>&#125;<br><br><span class="hljs-comment">// will be call in callback</span><br><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">SleepList::PutToReady</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-type">bool</span> woken = <span class="hljs-literal">false</span>;<br>    counter ++;<br><br>    <span class="hljs-comment">// check all thread in the list if there are thread already finish sleeping</span><br>    <span class="hljs-keyword">for</span>(std::list&lt;sleepthread&gt;::iterator it = threadlist.<span class="hljs-built_in">begin</span>();<br>        it != threadlist.<span class="hljs-built_in">end</span>(); )<br>    &#123;<br>        <span class="hljs-comment">// &#x27;when&#x27; 就是被創造時的 counter 加上他要 sleep 的時間，也就是他應該醒來的時間</span><br>        <span class="hljs-comment">// 所以我們檢查 when 跟 counter 來判斷他該不該醒來</span><br>        <span class="hljs-comment">// &#x27;when&#x27; is time the thread should wake up</span><br>        <span class="hljs-comment">// if counter &gt;= when, this thread will be ready to run.</span><br>        <span class="hljs-keyword">if</span>(counter &gt;= it-&gt;when)<br>        &#123;<br>            <span class="hljs-comment">// 若是他該醒來就把從睡覺 list 中去掉，然後把他叫醒 (用 ReadyToRun)</span><br>            woken = <span class="hljs-literal">true</span>;<br>            kernel-&gt;scheduler-&gt;<span class="hljs-built_in">ReadyToRun</span>(it-&gt;sleeper);<br>            it = threadlist.<span class="hljs-built_in">erase</span>(it);<br>        &#125;<br>        <span class="hljs-comment">// if the thread is not ready to run, keep checking next thread in the list.</span><br>        <span class="hljs-keyword">else</span><br>        &#123;<br>            it++;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> woken;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>最後在 test 中寫兩個 .c 檔，讓他們一起跑來看看 sleep 有沒有正確運作。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// /code/test/sleep1.c</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;syscall.h&quot;</span></span><br><span class="hljs-built_in">main</span>()<br>&#123;<br>    <span class="hljs-built_in">Sleep</span>(<span class="hljs-number">1000000</span>);<br>    <span class="hljs-built_in">PrintInt</span>(<span class="hljs-number">123</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>這樣跑十次 sleep2 才會跑一次 sleep1 才對</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// /code/test/sleep2.c</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;syscall.h&quot;</span></span><br><span class="hljs-built_in">main</span>()<br>&#123;<br>    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">20</span>; i++) &#123;<br>        <span class="hljs-built_in">Sleep</span>(<span class="hljs-number">100000</span>);<br>        <span class="hljs-built_in">PrintInt</span>(i);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>到這裡作業就完成了，大部分內容參考上面那兩個 blog 的，花了很多時間去看懂他們的 code 和追原有的 code，才去自己寫寫看，只是給自己做個紀錄，還是要花點時間對系統架構更深的理解才會比較得心應手吧，另外還有 Nini 學長的 blog 中提到檢查該醒來的 thread 那邊可以進行的優化有試著去做做看，之後有時間再補上，嗯。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/homework/" class="category-chain-item">homework</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/OS/">#OS</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSIE--NachOS-HW1</div>
+      <div>https://wiiwu959.github.io/2019/10/10/2019-10-10-OS_HW1-2019/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>October 10, 2019</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/10/29/2019-10-29-OS_HW2-2019/" title="CSIE--NachOS-HW2">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CSIE--NachOS-HW2</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/10/01/2019-10-01-Hello-2019/" title="Hello World !">
+                        <span class="hidden-mobile">Hello World !</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/js/hexo_resize_image.js"></script>
+<!-- hexo injector body_end end --></body>
+</html>

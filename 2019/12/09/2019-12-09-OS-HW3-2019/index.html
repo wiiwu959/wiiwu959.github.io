@@ -1,0 +1,683 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="好難……嗚嗚嗚QQ 作業要求 實現 virtual memory 並可以處理 page fault 實作 Page Replacement Algorithm 的 FIFO 與 LRU First in First out Page Replacement(FIFO) Least Recently Used Page Replacement(LRU)    Virtual Memory為了實作 v">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSIE--NachOS-HW3">
+<meta property="og:url" content="https://wiiwu959.github.io/2019/12/09/2019-12-09-OS-HW3-2019/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="好難……嗚嗚嗚QQ 作業要求 實現 virtual memory 並可以處理 page fault 實作 Page Replacement Algorithm 的 FIFO 與 LRU First in First out Page Replacement(FIFO) Least Recently Used Page Replacement(LRU)    Virtual Memory為了實作 v">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.imgur.com/NMi51fN.jpg">
+<meta property="og:image" content="https://i.imgur.com/w1CxCjh.jpg">
+<meta property="og:image" content="https://i.imgur.com/rUWcIlS.jpg">
+<meta property="article:published_time" content="2019-12-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-09-19T07:18:30.952Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.imgur.com/NMi51fN.jpg">
+  
+  
+  
+  <title>CSIE--NachOS-HW3 - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"wiiwu959.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSIE--NachOS-HW3"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-12-09 00:00" pubdate>
+          December 9, 2019 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          3.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          31 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSIE--NachOS-HW3</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>好難……嗚嗚嗚QQ</p>
+<h1 id="作業要求"><a href="#作業要求" class="headerlink" title="作業要求"></a>作業要求</h1><ul>
+<li>實現 virtual memory 並可以處理 page fault</li>
+<li>實作 Page Replacement Algorithm 的 FIFO 與 LRU<ul>
+<li>First in First out Page Replacement(FIFO)</li>
+<li>Least Recently Used Page Replacement(LRU)</li>
+</ul>
+</li>
+</ul>
+<h1 id="Virtual-Memory"><a href="#Virtual-Memory" class="headerlink" title="Virtual Memory"></a>Virtual Memory</h1><p>為了實作 virtual memory 的部分，把前面原本 multiprogramming 的地方修改了<br>先在 &#x2F;code&#x2F;userprog&#x2F;userkernel.h 中加上輔助用的記憶體</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">UserProgKernel</span> : <span class="hljs-keyword">public</span> ThreadedKernel &#123;<br>  <span class="hljs-keyword">public</span>:<br>    <span class="hljs-comment">// 利用 SynchDisk 作為輔助記憶體</span><br>    SynchDisk *virtualMemoryDisk;<br></code></pre></td></tr></table></figure>
+<p>還有 &#x2F;code&#x2F;userprog&#x2F;userkernel.cc</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">UserProgKernel::Initialize</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    ThreadedKernel::<span class="hljs-built_in">Initialize</span>();	<span class="hljs-comment">// init multithreading</span><br><br>    machine = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Machine</span>(debugUserProg);<br>    fileSystem = <span class="hljs-keyword">new</span> <span class="hljs-built_in">FileSystem</span>();<br>	<span class="hljs-comment">// 加上這一行增加輔助記憶體</span><br>    virtualMemoryDisk = <span class="hljs-keyword">new</span> <span class="hljs-built_in">SynchDisk</span>(<span class="hljs-string">&quot;Virtual Memory&quot;</span>);<br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> FILESYS</span><br>    synchDisk = <span class="hljs-keyword">new</span> <span class="hljs-built_in">SynchDisk</span>(<span class="hljs-string">&quot;New SynchDisk&quot;</span>);<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">// FILESYS</span></span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在 &#x2F;code&#x2F;machine&#x2F;machine.h 中加上會使用到的變數</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Machine</span> &#123;<br>  <span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">bool</span> usedPhyPage[NumPhysPages];		<span class="hljs-comment">// 紀錄那些 physical memory 已經被使用了</span><br>    <span class="hljs-type">bool</span> usedvirPage[NumPhysPages];		<span class="hljs-comment">// 記錄那些 virtual memory 已經被使用了</span><br>    <span class="hljs-type">int</span>  ID_num;				<span class="hljs-comment">// 每個 thread 都有一個專屬 ID_num 作為識別用的</span><br>    <span class="hljs-type">int</span> PhyPageName[NumPhysPages];<br>    <span class="hljs-type">int</span> count[NumPhysPages];			<span class="hljs-comment">// LRU 用的 counter</span><br><br>    TranslationEntry *main_tab[NumPhysPages];<br>	<span class="hljs-type">static</span> <span class="hljs-type">int</span> fifo;<br></code></pre></td></tr></table></figure>
+
+<p>宣告必要參數<br>&#x2F;code&#x2F;userprog&#x2F;addrspace.h</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">AddrSpace</span> &#123;<br>    <span class="hljs-keyword">public</span>:<br>        <span class="hljs-type">int</span> ID;       <span class="hljs-comment">// 存他 thread 的 id</span><br>    <span class="hljs-keyword">private</span>:<br>        <span class="hljs-type">bool</span> pageTableLoaded;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>許多調整都在此處，這裡負責 load 程式碼到 memory 裡面，所以相當重要。<br>我在這裡開一個專屬這個 thread 的 page table，在 load 時一直往下找記憶體直到找到沒被用到的或是到底為止，以此來判斷 memory 夠不夠用，若不夠就需要用到輔助記憶體，需要存好一些重要參數以便要用的時候找得到。</p>
+<p>&#x2F;code&#x2F;userprog&#x2F;addrspace.cc<br>後來覺得這段很醜所以就不放過來了，留在<a target="_blank" rel="noopener" href="https://github.com/wiiwu959/NachOS">github</a>裡面了。</p>
+<h1 id="Page-Replacement"><a href="#Page-Replacement" class="headerlink" title="Page Replacement"></a>Page Replacement</h1><p>宣告參數<br>&#x2F;code&#x2F;machine&#x2F;tranlate.h</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TranslationEntry</span> &#123;<br>  <span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> count;    <span class="hljs-comment">//for LRU</span><br>    <span class="hljs-type">int</span> ID;<br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>主要都是改 <code>else if (!pageTable[vpn].valid)</code> 裡面的東西，FIFO 就是一直照順序當 victim，<br>LRU 則是用一個 count 來計被用到的次數，每次把次數最少的換掉。<br>找完 victim 之後再去做 swap in swap out 的動作。<br>&#x2F;code&#x2F;machine&#x2F;tranlate.cc</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!pageTable[vpn].valid) &#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;page fault\n&quot;</span>);<br>	kernel-&gt;stats-&gt;numPageFaults++;<br>	j = <span class="hljs-number">0</span>;<br>	<span class="hljs-keyword">while</span>(kernel-&gt;machine-&gt;usedPhyPage[j] != <span class="hljs-literal">false</span> &amp;&amp; j &lt; NumPhysPages)&#123; j++; &#125;<br>	<span class="hljs-keyword">if</span> (j &lt; NumPhysPages) &#123;<br>		<span class="hljs-type">char</span> *buffer;<br>		buffer = <span class="hljs-keyword">new</span> <span class="hljs-type">char</span>[PageSize]; <br>		kernel-&gt;machine-&gt;usedPhyPage[j] = <span class="hljs-literal">true</span>;<br>		kernel-&gt;machine-&gt;PhyPageName[j] = pageTable[vpn].ID;<br><br>		kernel-&gt;machine-&gt;main_tab[j] = &amp;pageTable[vpn];<br>		pageTable[vpn].physicalPage = j;<br>		pageTable[vpn].valid = <span class="hljs-literal">true</span>;<br>		pageTable[vpn].count++; <span class="hljs-comment">//for LRU</span><br><br>		kernel-&gt;virtualMemoryDisk-&gt;<span class="hljs-built_in">ReadSector</span>(pageTable[vpn].virtualPage, buffer);<br>		<span class="hljs-built_in">bcopy</span>(buffer, &amp;mainMemory[j * PageSize], PageSize);<br>	&#125;<br>	<span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-type">char</span> *buffer1;<br>		buffer1 = <span class="hljs-keyword">new</span> <span class="hljs-type">char</span>[PageSize];<br>		<span class="hljs-type">char</span> *buffer2;<br>		buffer2 = <span class="hljs-keyword">new</span> <span class="hljs-type">char</span>[PageSize];<br><br>		<span class="hljs-comment">//FIFO</span><br>		<span class="hljs-keyword">if</span> (kernel-&gt;vmtype == <span class="hljs-number">0</span>)&#123;<br>			victim = fifo % <span class="hljs-number">32</span>; <span class="hljs-comment">// 32 is NumPhysPages</span><br>		&#125;<br><br>		<span class="hljs-comment">//LRU</span><br>		<span class="hljs-keyword">if</span> (kernel-&gt;vmtype == <span class="hljs-number">1</span>) &#123;<br>			<span class="hljs-type">int</span> min = pageTable[<span class="hljs-number">0</span>].count;<br>			victim = <span class="hljs-number">0</span>;<br>			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">32</span>; i++)&#123;<br>				<span class="hljs-comment">//printf(&quot;%d&quot;,pageTable[i].count);</span><br>				<span class="hljs-keyword">if</span>(min &gt; pageTable[i].count)&#123;<br>					min = pageTable[i].count;<br>					victim = i;<br>				&#125;<br>			&#125; <br>			pageTable[victim].count++;  <br>		&#125;<br>		<br><br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;page %d swapped\n&quot;</span>,victim);<br><br>		<span class="hljs-comment">// 把東西存到 disk 裡面</span><br>		<span class="hljs-built_in">bcopy</span>(&amp;mainMemory[victim * PageSize], buffer1, PageSize);<br>		kernel-&gt;virtualMemoryDisk-&gt;<span class="hljs-built_in">ReadSector</span>(pageTable[vpn].virtualPage, buffer2);<br>		<span class="hljs-built_in">bcopy</span>(buffer2, &amp;mainMemory[victim*PageSize], PageSize);<br>		kernel-&gt;virtualMemoryDisk-&gt;<span class="hljs-built_in">WriteSector</span>(pageTable[vpn].virtualPage, buffer1);<br><br>		main_tab[victim]-&gt;virtualPag e= pageTable[vpn].virtualPage;<br>		main_tab[victim]-&gt;valid = <span class="hljs-literal">false</span>;<br><br>		<span class="hljs-comment">// 把東西 load 到 main memory 中</span><br>		pageTable[vpn].valid = <span class="hljs-literal">true</span>;<br>		pageTable[vpn].physicalPage = victim;<br>		kernel-&gt;machine-&gt;PhyPageName[victim] = pageTable[vpn].ID;<br>		main_tab[victim] = &amp;pageTable[vpn];<br>		fifo ++;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h1 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h1><p>有特別在 &#x2F;code&#x2F;userprog&#x2F;userkernel.cc 加上一些參數調整讓他可以用參數切換，所以只要使用 -LRU 或 -FIFO 就可以選擇要使用的方法了。<br>Default 是設定使用 FIFO。</p>
+<h1 id="結果"><a href="#結果" class="headerlink" title="結果"></a>結果</h1><p>直接用了 test1 test2 各兩個去測試</p>
+<ul>
+<li>Page fault<br><img src="https://i.imgur.com/NMi51fN.jpg" srcset="/img/loading.gif" lazyload></li>
+<li>FIFO<br><img src="https://i.imgur.com/w1CxCjh.jpg" srcset="/img/loading.gif" lazyload></li>
+<li>LRU<br><img src="https://i.imgur.com/rUWcIlS.jpg" srcset="/img/loading.gif" lazyload></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/homework/" class="category-chain-item">homework</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/OS/">#OS</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSIE--NachOS-HW3</div>
+      <div>https://wiiwu959.github.io/2019/12/09/2019-12-09-OS-HW3-2019/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>December 9, 2019</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/05/06/2020-05-06-Stego_Collation/" title="忍術隱寫の術">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">忍術隱寫の術</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/10/29/2019-10-29-OS_HW2-2019/" title="CSIE--NachOS-HW2">
+                        <span class="hidden-mobile">CSIE--NachOS-HW2</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/js/hexo_resize_image.js"></script>
+<!-- hexo injector body_end end --></body>
+</html>
