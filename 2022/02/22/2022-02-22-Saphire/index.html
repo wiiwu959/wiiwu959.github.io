@@ -25,13 +25,14 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://i.imgur.com/d7kG04y.png?300x">
 <meta property="og:image" content="https://i.imgur.com/z7f9M0A.png">
+<meta property="og:image" content="https://i.imgur.com/CIULMjv.png?500x">
 <meta property="og:image" content="https://i.imgur.com/gzLlySS.png">
-<meta property="og:image" content="https://i.imgur.com/WwM9SjR.png">
+<meta property="og:image" content="https://i.imgur.com/WwM9SjR.png=300x">
 <meta property="og:image" content="https://i.imgur.com/8R8AxXz.png">
 <meta property="og:image" content="https://i.imgur.com/1LBgDRI.png">
 <meta property="og:image" content="https://i.imgur.com/nhoqfJO.png">
 <meta property="article:published_time" content="2022-02-22T09:03:19.000Z">
-<meta property="article:modified_time" content="2022-09-19T09:09:56.752Z">
+<meta property="article:modified_time" content="2022-09-19T09:11:28.261Z">
 <meta property="article:author" content="Wii Wu">
 <meta property="article:tag" content="paper">
 <meta property="article:tag" content="security">
@@ -242,7 +243,7 @@
         
         
           <!-- compatible with older versions-->
-          40 分钟
+          39 分钟
         
       </span>
     
@@ -348,7 +349,7 @@
 </li>
 </ul>
 <p>最費工的會是處理 dependency 的部分，若是單純的 include 就可以很輕鬆的處理，但是如果用上一些 variable 或是 constant 就會需要額外處理</p>
-<h4 id="String-representation"><a href="#String-representation" class="headerlink" title="String representation"></a>String representation</h4><p>會用各種方法對不同種類的 include string 轉換，直到不能處理或是處理完為止<br>![](<a target="_blank" rel="noopener" href="https://i.imgur.com/CIULMjv.png">https://i.imgur.com/CIULMjv.png</a> &#x3D;500x)<br>(variable 如果被 assign 很多次就一一找出，若是不行就會把所有可能性都列出)</p>
+<h4 id="String-representation"><a href="#String-representation" class="headerlink" title="String representation"></a>String representation</h4><p>會用各種方法對不同種類的 include string 轉換，直到不能處理或是處理完為止<br><img src="https://i.imgur.com/CIULMjv.png?500x" srcset="/img/loading.gif" lazyload><br>(variable 如果被 assign 很多次就一一找出，若是不行就會把所有可能性都列出)</p>
 <h4 id="Unresolved-Includes"><a href="#Unresolved-Includes" class="headerlink" title="Unresolved Includes"></a>Unresolved Includes</h4><p>到這裡 74% 的 include 可以解決，剩下的可以被 fuzzy resolved，也就是把一個小集合的內容都當作是有 include 到的。<br>有些 include 完全沒辦法從靜態分析中獲得任何資訊，這種時候他們有提供 Conservative Includes 的選項，用的就是這種方法，開了這個選項以後 FP 的機率會降低，但是 allowed list 中的內容就會變得比較多。</p>
 <h4 id="Building-system-call-profiles-for-Scripts"><a href="#Building-system-call-profiles-for-Scripts" class="headerlink" title="Building system-call profiles for Scripts"></a>Building system-call profiles for Scripts</h4><p>最後手上有了一個 script 和他的 dependency 會 call 的 PHP function 和前一步得到的這個 mapping 以後就能生出一個 script 對應到 syscall 的 profile 了 (script path &lt;-&gt; profile)</p>
 <h3 id="Sandboxing-the-Interpreter-and-Web-App"><a href="#Sandboxing-the-Interpreter-and-Web-App" class="headerlink" title="Sandboxing the Interpreter and Web App"></a>Sandboxing the Interpreter and Web App</h3><p>利用 seccomp 來實作這個 allowed list，這個 SE extension 會在 process 跑起來的時候知道他跑了其中的哪一個 script 然後告訴 kernel 要用哪個 syscall allowed list。<br>所以這個 SE 在一個 interpreter 的 lifetime 裡總共會跑兩次，第一次是 PHP process 跑起來的時候，所有 allowed list 會被 load 到 memory 裡，然後收到 request 的時候，會把要用的 allowed list 給 kernel。<br>(使用 <code>libseccomp</code> 來把一連串的 syscall 轉成 allowlist)</p>
@@ -369,7 +370,7 @@
 </ul>
 <h3 id="Syscall-Profile-Size"><a href="#Syscall-Profile-Size" class="headerlink" title="Syscall Profile Size"></a>Syscall Profile Size</h3><ul>
 <li>想知道會 filter 掉多少 syscall 和 CI 的成效，看 syscall profile 的 size，size 愈大就會有愈多可以用的 syscall，所以在能跑的範圍內盡量愈小愈好</li>
-<li>特別也 evaluate 了危險的 syscall<br><img src="https://i.imgur.com/WwM9SjR.png" srcset="/img/loading.gif" lazyload></li>
+<li>特別也 evaluate 了危險的 syscall<br><img src="https://i.imgur.com/WwM9SjR.png=300x" srcset="/img/loading.gif" lazyload></li>
 <li>黑線是 CI 沒有開的時候<ul>
 <li>開起來的時候 FP 會降低，但危險性會增加</li>
 </ul>
