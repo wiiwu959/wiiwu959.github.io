@@ -23,27 +23,27 @@
 <meta property="og:site_name" content="Wii&#39;s Blog">
 <meta property="og:description" content="paper: https:&#x2F;&#x2F;pacmanattack.com&#x2F;paper.pdf  Abstract這篇 paper 提出新的攻擊方式叫做 PACMAN，結合 memory corruption 漏洞和 speculative excution 漏洞的攻擊，利用 side channels 在不造成 crash 的情況下 speculatively leaks PAC verification">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://i.imgur.com/1ME9fSO.png?350x">
-<meta property="og:image" content="https://i.imgur.com/b1DqMo7.png?350x">
-<meta property="og:image" content="https://i.imgur.com/ggHiYGL.png">
-<meta property="og:image" content="https://i.imgur.com/X67JkSK.png?400x">
-<meta property="og:image" content="https://i.imgur.com/s62UYtI.png?450x">
-<meta property="og:image" content="https://i.imgur.com/uSi0SoO.png?450x">
-<meta property="og:image" content="https://i.imgur.com/jxtNlZS.png?450x">
-<meta property="og:image" content="https://i.imgur.com/9qEmBjx.png?500x">
-<meta property="og:image" content="https://i.imgur.com/kht8qCB.png">
-<meta property="og:image" content="https://i.imgur.com/TrUiXAy.png?500x">
-<meta property="og:image" content="https://i.imgur.com/3PrxiYJ.png?500x">
-<meta property="og:image" content="https://i.imgur.com/jnGA7tw.png?500x">
-<meta property="og:image" content="https://i.imgur.com/ryxncvG.png?500x">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/1ME9fSO.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/b1DqMo7.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/ggHiYGL.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/X67JkSK.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/s62UYtI.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/uSi0SoO.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/jxtNlZS.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/9qEmBjx.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/kht8qCB.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/TrUiXAy.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/3PrxiYJ.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/jnGA7tw.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2022-06-28/ryxncvG.png">
 <meta property="og:image" content="https://i.imgur.com/NgeVvd3.png?500x">
 <meta property="article:published_time" content="2022-06-28T07:30:42.000Z">
-<meta property="article:modified_time" content="2022-09-19T09:06:17.261Z">
+<meta property="article:modified_time" content="2025-07-01T17:40:43.759Z">
 <meta property="article:author" content="Wii Wu">
 <meta property="article:tag" content="paper">
 <meta property="article:tag" content="security">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://i.imgur.com/1ME9fSO.png?350x">
+<meta name="twitter:image" content="https://wiiwu959.github.io/img/2022-06-28/1ME9fSO.png">
   
   
   
@@ -339,8 +339,8 @@
 </ul>
 <p>雖然提供了保護提升攻擊難度但還是都有被繞過的可能。</p>
 <h3 id="ARM-Pointer-Authentication-1"><a href="#ARM-Pointer-Authentication-1" class="headerlink" title="ARM Pointer Authentication"></a>ARM Pointer Authentication</h3><p>ARMv8.3 開始提供的 overhead 很小的保護機制，保護 pointer 不會被亂改，主要就是去幫 pointer 簽一個 hash，這裡稱為 Pointer Authentication Code (PAC)，在用這個 pointer 之前會先檢查 PAC。</p>
-<h4 id="Signing-and-Verifying-Pointers"><a href="#Signing-and-Verifying-Pointers" class="headerlink" title="Signing and Verifying Pointers"></a>Signing and Verifying Pointers</h4><p>實際上 64 bits 架構的 address space 不會真的用到 64 bits，PA 就會把 PAC 吋在多的沒用到的 bits。<br><img src="https://i.imgur.com/1ME9fSO.png?350x" srcset="/img/loading.gif" lazyload><br>圖中拿來簽hash 的這個 context value 裡面有存在高權限才碰得到的 register 中的 key 和 program-specified salt。</p>
-<h4 id="ISA-Extension"><a href="#ISA-Extension" class="headerlink" title="ISA Extension"></a>ISA Extension</h4><p><img src="https://i.imgur.com/b1DqMo7.png?350x" srcset="/img/loading.gif" lazyload><br>為了提供 PA 功能，PA 提供了兩組 instructions sets 來做這些事</p>
+<h4 id="Signing-and-Verifying-Pointers"><a href="#Signing-and-Verifying-Pointers" class="headerlink" title="Signing and Verifying Pointers"></a>Signing and Verifying Pointers</h4><p>實際上 64 bits 架構的 address space 不會真的用到 64 bits，PA 就會把 PAC 吋在多的沒用到的 bits。<br><img src="/../img/2022-06-28/1ME9fSO.png" srcset="/img/loading.gif" lazyload><br>圖中拿來簽hash 的這個 context value 裡面有存在高權限才碰得到的 register 中的 key 和 program-specified salt。</p>
+<h4 id="ISA-Extension"><a href="#ISA-Extension" class="headerlink" title="ISA Extension"></a>ISA Extension</h4><p><img src="/../img/2022-06-28/b1DqMo7.png" srcset="/img/loading.gif" lazyload><br>為了提供 PA 功能，PA 提供了兩組 instructions sets 來做這些事</p>
 <ul>
 <li><code>pac</code> 開頭的是做 signing 的工作<ul>
 <li>最多有五組的 key 可以同時硬體記錄著，當次 signing 要用的 key 跟  opcode 有關</li>
@@ -393,7 +393,7 @@
 <li>verification<br>  verifies the PAC，給一個 pointer ，然後他會驗證 PAC 是否正確，正確就 output 一個有效的 pointer，錯誤就 output 一個壞的 pointer，執行的時候就會出錯 (前面 Background 有講過)</li>
 <li>transmission<br>  他會預先去執行 verificated 的輸出 (pointer) (可能是個 load&#x2F;store，反正就是預先轉成 physical address 去使用他)，如果過了就會產生可以被觀察到的 side effect (就能經由 side channel 偷相關的資訊)，若預先執行失敗就會有個 speculative exception，而這些因為都是在 mis-speculated branch 之下發生的所有不會造成 crash</li>
 </ul>
-<p>其中 PACMAN gadgets 又分成以下兩種<br><img src="https://i.imgur.com/ggHiYGL.png" srcset="/img/loading.gif" lazyload></p>
+<p>其中 PACMAN gadgets 又分成以下兩種<br><img src="/../img/2022-06-28/ggHiYGL.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>Data PACMAN Gadget (圖3c)<ul>
 <li>預先去猜分支做 data accesses 造成的</li>
@@ -410,7 +410,7 @@
 <li>fetch 正確的 BR2 (也就是剛剛 AUT 的結果)</li>
 <li>限制:<ul>
 <li>必須支援 eager squashing of nested branches，一定要有第三步的 squash AUT 後的 pointer 才會被用，才能 leak AUT 結果</li>
-<li>需要區分 fetching the verified pointer 和 BTB prediction 的 side effect，以這裡用的 PoC 用的 TLB-based side channel， BTB prediction 和 verified pointer 要在不同 page 才行<br><img src="https://i.imgur.com/X67JkSK.png?400x" srcset="/img/loading.gif" lazyload></li>
+<li>需要區分 fetching the verified pointer 和 BTB prediction 的 side effect，以這裡用的 PoC 用的 TLB-based side channel， BTB prediction 和 verified pointer 要在不同 page 才行<br>  <img src="/../img/2022-06-28/X67JkSK.png" srcset="/img/loading.gif" lazyload></li>
 </ul>
 </li>
 </ul>
@@ -418,7 +418,7 @@
 </ul>
 <h3 id="Gadget-Detection"><a href="#Gadget-Detection" class="headerlink" title="Gadget Detection"></a>Gadget Detection</h3><p>用 Ghidra’s scripting API 找 kernel 中 conditional branches，檢查它之後的 32 個 instructions，若驗證後的 pointer 會被用在 transmit instruction (a memory access or a branch instruction) 就視為 PACMAN Gadget。</p>
 <p>在 xnu-8019.80.24 中找到13867 個 data PACMAN gadgets 和 41292 個 instruction PACMAN gadgets，因為這裡只往後找 32 個指令，所以若再找多一點還說不定更多。</p>
-<h3 id="An-End-to-End-Illustrative-Example"><a href="#An-End-to-End-Illustrative-Example" class="headerlink" title="An End-to-End Illustrative Example"></a>An End-to-End Illustrative Example</h3><p><img src="https://i.imgur.com/s62UYtI.png?450x" srcset="/img/loading.gif" lazyload><br>有個 BoF 可以蓋到 function pointer。</p>
+<h3 id="An-End-to-End-Illustrative-Example"><a href="#An-End-to-End-Illustrative-Example" class="headerlink" title="An End-to-End Illustrative Example"></a>An End-to-End Illustrative Example</h3><p><img src="/../img/2022-06-28/s62UYtI.png" srcset="/img/loading.gif" lazyload><br>有個 BoF 可以蓋到 function pointer。</p>
 <ol>
 <li>先正常執行程式，train BTB 和 branch predictor (cond &#x3D; true)</li>
 <li>BoF 竄改 fp，猜 PAC 直到猜中 (cond &#x3D; false，不真的進 branch，而是讓它 speculative 跑進 branch，不會造成 crach)</li>
@@ -442,7 +442,7 @@
 </li>
 </ul>
 <p>上述的東西都是沒有 opensource 的而且也沒什麼文件，所以需要做 Reverse 來得到一些需要的資訊，這也是這篇論文其中一大 contribution。</p>
-<h2 id="Reverse-Engineering-Tools"><a href="#Reverse-Engineering-Tools" class="headerlink" title="Reverse Engineering Tools"></a>Reverse Engineering Tools</h2><h3 id="High-Resolution-Timers"><a href="#High-Resolution-Timers" class="headerlink" title="High-Resolution Timers"></a>High-Resolution Timers</h3><p>前面有提到 side channel attack (Prime+Probe)，這種攻擊需要比較精準的時間，所以他們找出 M1 中有那些 timer 可以使用。<br><img src="https://i.imgur.com/uSi0SoO.png?450x" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Reverse-Engineering-Tools"><a href="#Reverse-Engineering-Tools" class="headerlink" title="Reverse Engineering Tools"></a>Reverse Engineering Tools</h2><h3 id="High-Resolution-Timers"><a href="#High-Resolution-Timers" class="headerlink" title="High-Resolution Timers"></a>High-Resolution Timers</h3><p>前面有提到 side channel attack (Prime+Probe)，這種攻擊需要比較精準的時間，所以他們找出 M1 中有那些 timer 可以使用。<br><img src="/../img/2022-06-28/uSi0SoO.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>CNTPCT_EL0<ul>
 <li>System Counter，所有的 core 都用共享這個 counter 但是 24 MHz 太低了，沒辦法很精準地觀察到有沒有 cache hit&#x2F;miss 這種差異</li>
@@ -458,13 +458,13 @@
 </ul>
 </li>
 <li>Custom Multi-thread Timer<ul>
-<li>自己做了一個不需要 kext 的 userspace accesible timer，做法像這樣<br>  <img src="https://i.imgur.com/jxtNlZS.png?450x" srcset="/img/loading.gif" lazyload></li>
+<li>自己做了一個不需要 kext 的 userspace accesible timer，做法像這樣<br>  <img src="/../img/2022-06-28/jxtNlZS.png" srcset="/img/loading.gif" lazyload></li>
 <li>isb 是控制流程用的，但是後來發現不加變動會稍微變大，但時間的精細度會高一點所以最後還是拿掉了</li>
 </ul>
 </li>
 </ul>
 <h3 id="PacmanOS"><a href="#PacmanOS" class="headerlink" title="PacmanOS"></a>PacmanOS</h3><p>用 Rust 寫的，可以在 M1 上跑的 bare mental 環境，可以讓他們完全控制整個環境，包括硬體、其他干擾等等方便跑實驗。</p>
-<h2 id="Reverse-Engineering"><a href="#Reverse-Engineering" class="headerlink" title="Reverse Engineering"></a>Reverse Engineering</h2><h3 id="Basic-Memory-Hierarchy-Information"><a href="#Basic-Memory-Hierarchy-Information" class="headerlink" title="Basic Memory Hierarchy Information"></a>Basic Memory Hierarchy Information</h3><p><img src="https://i.imgur.com/9qEmBjx.png?500x" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Reverse-Engineering"><a href="#Reverse-Engineering" class="headerlink" title="Reverse Engineering"></a>Reverse Engineering</h2><h3 id="Basic-Memory-Hierarchy-Information"><a href="#Basic-Memory-Hierarchy-Information" class="headerlink" title="Basic Memory Hierarchy Information"></a>Basic Memory Hierarchy Information</h3><p><img src="/../img/2022-06-28/9qEmBjx.png" srcset="/img/loading.gif" lazyload></p>
 <p>M1 用 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ARM_big.LITTLE">big.LITTLE</a> design</p>
 <blockquote>
 <p>big.LITTLE: ARM 提出的把運算能力比較強的 big core 和比較弱但較不耗電的 little core 結合在一起的組合，這裡用 p-core (Performance) 和 e-core (Efficient) 分別稱呼 big 和 little，但這是 intel 的命名</p>
@@ -477,7 +477,7 @@
 <li>load N 個 address 來把 TLB 塞滿</li>
 <li>再 load 一次最一開始 load 的那個 address，測量 latency</li>
 </ol>
-<p><img src="https://i.imgur.com/kht8qCB.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/../img/2022-06-28/kht8qCB.png" srcset="/img/loading.gif" lazyload></p>
 <p>最後得到 (a) 圖，可以看出每一次的差距都是 TLB size 的臨界 (L1 dTLB&#x2F;L2 TLB)，雖然無法斷言 cache 設計是不是真的就跟推測的一樣但至少可以知道怎麼樣才能填滿 TLB</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs !">1) To evict a page table entry from the L1 dTLB, we can create an eviction set with 12 or more addresses with a stride of 256×16KB.<br>2) To evict a page table entry from the L2 TLB, we can create an eviction set with 23 or more addresses with a stride of 2048×16KB.<br></code></pre></td></tr></table></figure>
 
@@ -489,7 +489,7 @@
 <li>Load 第 2 步的那個 address，測量 latency (為什麼是 “load” 得到 data access 的 latency 下面會解釋)</li>
 </ol>
 <p>得到的結果是圖 c，解釋結果之前先講一下他們推論的整個 TLB 架構</p>
-<p><img src="https://i.imgur.com/TrUiXAy.png?500x" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/../img/2022-06-28/TrUiXAy.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>user 和 kernel 的 L1 iTLB 並不共享，userspace 無法觀察到 kernel space 的差異</li>
 <li>L1 dTLB 是 L1 iTLB 的 non-inclusive backing-store，iTLB 塞滿了就會被塞到 dTLB 去，這就是為什麼剛剛測量的步驟 4 是用 “load” 測量 data access 的 latency</li>
@@ -499,11 +499,11 @@
 <h3 id="Summary-of-Reverse-Engineering-Results"><a href="#Summary-of-Reverse-Engineering-Results" class="headerlink" title="Summary of Reverse Engineering Results"></a>Summary of Reverse Engineering Results</h3><ul>
 <li>先把 iTLB 填滿之後就能填到 dTLB</li>
 </ul>
-<p><img src="https://i.imgur.com/3PrxiYJ.png?500x" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/../img/2022-06-28/3PrxiYJ.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>不管是用 PMC0 或 Multi-thread Counter 都可以清楚分出有沒有 TLB hit、cache hit 的差別</li>
 </ul>
-<h2 id="Proof-of-Concept-Attacks"><a href="#Proof-of-Concept-Attacks" class="headerlink" title="Proof-of-Concept Attacks"></a>Proof-of-Concept Attacks</h2><h3 id="PAC-Oracles"><a href="#PAC-Oracles" class="headerlink" title="PAC Oracles"></a>PAC Oracles</h3><p>實驗中他們裝個有可以用 syscall trigger PACMAN gadget 的 kext，然後傳一堆有正確 PAC 的 pointer 和沒有 PAC 的 pointer 測試然後用他們定義的那個 counter 測量時間，然後分別用 data access 和 instruction fetch 兩種方式來 leak PAC 是否正確<br><img src="https://i.imgur.com/jnGA7tw.png?500x" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Proof-of-Concept-Attacks"><a href="#Proof-of-Concept-Attacks" class="headerlink" title="Proof-of-Concept Attacks"></a>Proof-of-Concept Attacks</h2><h3 id="PAC-Oracles"><a href="#PAC-Oracles" class="headerlink" title="PAC Oracles"></a>PAC Oracles</h3><p>實驗中他們裝個有可以用 syscall trigger PACMAN gadget 的 kext，然後傳一堆有正確 PAC 的 pointer 和沒有 PAC 的 pointer 測試然後用他們定義的那個 counter 測量時間，然後分別用 data access 和 instruction fetch 兩種方式來 leak PAC 是否正確<br><img src="/../img/2022-06-28/jnGA7tw.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>Leaking via Data Accesses<ul>
 <li>因為 dTLB user 和 kernel 共享，所以可以直接測</li>
@@ -541,7 +541,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="Jump2Win-Attack"><a href="#Jump2Win-Attack" class="headerlink" title="Jump2Win Attack"></a>Jump2Win Attack</h3><p>有 PAC 就能單純的去利用漏洞了<br><img src="https://i.imgur.com/ryxncvG.png?500x" srcset="/img/loading.gif" lazyload><br><img src="https://i.imgur.com/NgeVvd3.png?500x" srcset="/img/loading.gif" lazyload></p>
+<h3 id="Jump2Win-Attack"><a href="#Jump2Win-Attack" class="headerlink" title="Jump2Win Attack"></a>Jump2Win Attack</h3><p>有 PAC 就能單純的去利用漏洞了<br><img src="/../img/2022-06-28/ryxncvG.png" srcset="/img/loading.gif" lazyload><br><img src="https://i.imgur.com/NgeVvd3.png?500x" srcset="/img/loading.gif" lazyload></p>
 <h2 id="Contermeasures"><a href="#Contermeasures" class="headerlink" title="Contermeasures"></a>Contermeasures</h2><ul>
 <li>explore PAC-agnostic execution<ul>
 <li>修改架構或軟體來確保 PAC 不會在 speculation 的時候被驗證並使用</li>

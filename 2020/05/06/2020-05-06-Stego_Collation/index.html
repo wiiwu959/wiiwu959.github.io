@@ -23,18 +23,18 @@
 <meta property="og:site_name" content="Wii&#39;s Blog">
 <meta property="og:description" content="作為一個 CTF 垃圾菜雞，每次下手都只能從別人可能根本不屑的misc開始看能不能撿些分數，最近想說仔細把 Stego 的套路都熟悉一下，下次撿分的時候至少不要連 misc 都撿不了，所以讀了一些關於 Stego 套路的文章，這裡稍微整理一下。 隱藏檔案這應該算是很容易被發現的一個套路，把檔案藏在圖片裡，原理是讀圖片的工具通常遇到 ‘FF D9’ 結尾就會把它當成 jpg 檔了，所以接在他後面的">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://i.imgur.com/Aqmtivw.jpg">
-<meta property="og:image" content="https://i.imgur.com/fY8DFmJ.jpg">
-<meta property="og:image" content="https://i.imgur.com/Sen9lMs.png">
-<meta property="og:image" content="https://i.imgur.com/f4xAb7P.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-05-06/Aqmtivw.jpg">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-05-06/fY8DFmJ.jpg">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-05-06/Sen9lMs.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-05-06/f4xAb7P.png">
 <meta property="article:published_time" content="2020-05-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-09-19T07:18:30.952Z">
+<meta property="article:modified_time" content="2025-07-01T17:33:03.116Z">
 <meta property="article:author" content="Wii Wu">
 <meta property="article:tag" content="CTF">
 <meta property="article:tag" content="misc">
 <meta property="article:tag" content="stego">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://i.imgur.com/Aqmtivw.jpg">
+<meta name="twitter:image" content="https://wiiwu959.github.io/img/2020-05-06/Aqmtivw.jpg">
   
   
   
@@ -283,7 +283,7 @@
               <div class="markdown-body">
                 
                 <p>作為一個 CTF 垃圾菜雞，每次下手都只能從別人可能根本不屑的misc開始看能不能撿些分數，最近想說仔細把 Stego 的套路都熟悉一下，下次撿分的時候至少不要連 misc 都撿不了，所以讀了一些關於 Stego 套路的文章，這裡稍微整理一下。</p>
-<h2 id="隱藏檔案"><a href="#隱藏檔案" class="headerlink" title="隱藏檔案"></a>隱藏檔案</h2><p>這應該算是很容易被發現的一個套路，把檔案藏在圖片裡，原理是讀圖片的工具通常遇到 ‘FF D9’ 結尾就會把它當成 jpg 檔了，所以接在他後面的 data 它也不管，圖片也就能正常顯示，把副檔名改成 zip 就能變回壓縮檔了，只是覺得滿有趣所以記一下。<br><img src="https://i.imgur.com/Aqmtivw.jpg" srcset="/img/loading.gif" lazyload><br>在 windows 裡面可以直接用 <code>copy /b a.jpg+b.zip output.jpg</code> 做出來，在 linux 裡也可以用 <code>cat a.jpg b.zip &gt; output.jpg</code> 做到。<br>遇到這種只要用 winhex 開起來看看就會發現後面還有東西了，或是用 binwalk 也可以輕易被發現。<br><img src="https://i.imgur.com/fY8DFmJ.jpg" srcset="/img/loading.gif" lazyload><br>那如果需要把隱藏的東西，或是合在同一個檔案的東西拆開來有幾種方式。</p>
+<h2 id="隱藏檔案"><a href="#隱藏檔案" class="headerlink" title="隱藏檔案"></a>隱藏檔案</h2><p>這應該算是很容易被發現的一個套路，把檔案藏在圖片裡，原理是讀圖片的工具通常遇到 ‘FF D9’ 結尾就會把它當成 jpg 檔了，所以接在他後面的 data 它也不管，圖片也就能正常顯示，把副檔名改成 zip 就能變回壓縮檔了，只是覺得滿有趣所以記一下。<br><img src="/../img/2020-05-06/Aqmtivw.jpg" srcset="/img/loading.gif" lazyload><br>在 windows 裡面可以直接用 <code>copy /b a.jpg+b.zip output.jpg</code> 做出來，在 linux 裡也可以用 <code>cat a.jpg b.zip &gt; output.jpg</code> 做到。<br>遇到這種只要用 winhex 開起來看看就會發現後面還有東西了，或是用 binwalk 也可以輕易被發現。<br><img src="/../img/2020-05-06/fY8DFmJ.jpg" srcset="/img/loading.gif" lazyload><br>那如果需要把隱藏的東西，或是合在同一個檔案的東西拆開來有幾種方式。</p>
 <ul>
 <li>winhex 把要擷取的地方選起來，右鍵Edit-&gt;Copy Block-&gt;Into New File</li>
 <li><a target="_blank" rel="noopener" href="https://code.yidas.com/linux-dd-command-test-io/">dd</a> <code>dd if=[input] of=[output] skip=[ 從哪個byte開始做 ] bs=1</code></li>
@@ -297,7 +297,7 @@
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/blues1021/article/details/45422557">JPG</a></li>
 <li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Magic_number_%28programming%29#Magic_numbers_in_files">Magic Number in File</a></li>
 </ul>
-<h2 id="metadata"><a href="#metadata" class="headerlink" title="metadata"></a>metadata</h2><p>有時候訊息會直接藏在圖片的 metadata，可以用 windows 的右鍵內容直接看到，或是在 linux 下可以 <code>exiftool</code> 來查看，也可以直接丟到<a target="_blank" rel="noopener" href="https://www.metadata2go.com/">線上</a>處理。<br>像是 picoCTF 2018 的 Truly an Artist。<br><img src="https://i.imgur.com/Sen9lMs.png" srcset="/img/loading.gif" lazyload><br><img src="https://i.imgur.com/f4xAb7P.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="metadata"><a href="#metadata" class="headerlink" title="metadata"></a>metadata</h2><p>有時候訊息會直接藏在圖片的 metadata，可以用 windows 的右鍵內容直接看到，或是在 linux 下可以 <code>exiftool</code> 來查看，也可以直接丟到<a target="_blank" rel="noopener" href="https://www.metadata2go.com/">線上</a>處理。<br>像是 picoCTF 2018 的 Truly an Artist。<br><img src="/../img/2020-05-06/Sen9lMs.png" srcset="/img/loading.gif" lazyload><br><img src="/../img/2020-05-06/f4xAb7P.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="雙圖"><a href="#雙圖" class="headerlink" title="雙圖"></a>雙圖</h2><p>通常會給兩張圖的，就會需要比較兩張圖的差異，可能會是 XOR&#x2F;SUB&#x2F;AND&#x2F;OR&#x2F;MUL 不一定，可以善用 stegsolve 裡面的 Analysis-&gt;Image Combiner 處理。<br>有時候會是需要比較 data 內的差異，抓出有問題的 data 段來分析。</p>
 <h2 id="Blind-WaterMark"><a href="#Blind-WaterMark" class="headerlink" title="Blind WaterMark"></a>Blind WaterMark</h2><p><a target="_blank" rel="noopener" href="https://github.com/chishaxie/BlindWaterMark">腳本和說明</a><br>除了圖片以外，音檔、pdf、pcap 也都可以藏東西，之後只要有遇到相關的題目會再回來補上。</p>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>

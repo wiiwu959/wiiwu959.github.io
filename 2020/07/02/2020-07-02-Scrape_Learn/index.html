@@ -23,16 +23,16 @@
 <meta property="og:site_name" content="Wii&#39;s Blog">
 <meta property="og:description" content="今天是實習第二天，然後學長要我爬個網頁，之前對爬蟲的認識就是 Hank 學長講過一點，就花了十幾分鐘看一下再花十幾分鐘把東西爬一爬，然後我就不知道要做什麼了…，想說不然就把看到的內容整理一下，下次忘記就能直接翻這裡看。 爬蟲就是用程式去把本來會傳給瀏覽器、經過編譯給人看的內容抓下來整理成我們要的格式，這裡都以我最近要抓的網站 MITRE 為例，來抓 MITRE Software 頁面！ 抓網頁內容">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://i.imgur.com/C9wp6jl.jpg">
-<meta property="og:image" content="https://i.imgur.com/jq3dqtK.jpg">
-<meta property="og:image" content="https://i.imgur.com/DoNdgjW.jpg">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-07-02/C9wp6jl.jpg">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-07-02/jq3dqtK.jpg">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2020-07-02/DoNdgjW.jpg">
 <meta property="article:published_time" content="2020-07-01T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-09-19T07:18:30.952Z">
+<meta property="article:modified_time" content="2025-07-01T17:33:43.075Z">
 <meta property="article:author" content="Wii Wu">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="crawler">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://i.imgur.com/C9wp6jl.jpg">
+<meta name="twitter:image" content="https://wiiwu959.github.io/img/2020-07-02/C9wp6jl.jpg">
   
   
   
@@ -289,7 +289,7 @@
 <p>上面的 requests.get 就直接得到完整 response 了，<code>print(resp)</code> 會印出 HTTP Status Code，<code>resp.text</code> 則可以取得網頁內容，BeautifulSoup 則是可以方便我們拆開網頁內容的工具，所以這裡總之就先把網頁內容餵給它。<br>若需要印出給人看一點的 html 內容</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.prettify())<br></code></pre></td></tr></table></figure>
 
-<h1 id="整理資料"><a href="#整理資料" class="headerlink" title="整理資料"></a>整理資料</h1><p>要去整理網頁資料就要先觀察它的架構，還有要爬的內容。<br>這裡以爬 Software 頁面的所有 Software 名字為例子，整個網頁長得像這個樣子<br><img src="https://i.imgur.com/C9wp6jl.jpg" srcset="/img/loading.gif" lazyload><br>若要取得這個網頁的大標 Software，可以先看看它的 source code，看到大標是用 <code>&lt;h1&gt;&lt;/h1&gt;</code> tag 起來，所以可以這樣來取得</p>
+<h1 id="整理資料"><a href="#整理資料" class="headerlink" title="整理資料"></a>整理資料</h1><p>要去整理網頁資料就要先觀察它的架構，還有要爬的內容。<br>這裡以爬 Software 頁面的所有 Software 名字為例子，整個網頁長得像這個樣子<br><img src="/../img/2020-07-02/C9wp6jl.jpg" srcset="/img/loading.gif" lazyload><br>若要取得這個網頁的大標 Software，可以先看看它的 source code，看到大標是用 <code>&lt;h1&gt;&lt;/h1&gt;</code> tag 起來，所以可以這樣來取得</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.h1)<br></code></pre></td></tr></table></figure>
 <p>上面這種會連著 tag 完整的印出來，也可以只取文字和去掉前後的空白</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.h1.text.strip())<br></code></pre></td></tr></table></figure>
@@ -297,9 +297,9 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.table.find_all(<span class="hljs-string">&#x27;td&#x27;</span>))<br></code></pre></td></tr></table></figure>
 <p>回傳的格式會是一個 list，裡面塞著所有網頁中的 <code>&lt;td&gt;</code> 內容，稍微清理一下我們就能得到 software name list 了</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python">software_name = []<br>software_table = bs.table.find_all(<span class="hljs-string">&#x27;td&#x27;</span>)<br><span class="hljs-keyword">while</span> software_table:<br>    software_name.append(software_table[<span class="hljs-number">0</span>].a.text.strip())<br>    software_table = software_table[<span class="hljs-number">3</span>:]<br><span class="hljs-built_in">print</span>(software_name)<br></code></pre></td></tr></table></figure>
-<p><img src="https://i.imgur.com/jq3dqtK.jpg" srcset="/img/loading.gif" lazyload><br>若需要取得其他內容，像是 <code>&lt;a&gt;</code> 中的 href 等等，也可以這樣拿</p>
+<p><img src="/../img/2020-07-02/jq3dqtK.jpg" srcset="/img/loading.gif" lazyload><br>若需要取得其他內容，像是 <code>&lt;a&gt;</code> 中的 href 等等，也可以這樣拿</p>
 <figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">software_table<span class="hljs-selector-attr">[0]</span><span class="hljs-selector-class">.a</span><span class="hljs-selector-attr">[<span class="hljs-string">&#x27;href&#x27;</span>]</span><br></code></pre></td></tr></table></figure>
-<p>最後紀錄一下，像是在下面的這種單一 software 頁面中，有多個 table 但是我只需要特定的那個怎麼辦？<br><img src="https://i.imgur.com/DoNdgjW.jpg" srcset="/img/loading.gif" lazyload><br>可以用這種方法</p>
+<p>最後紀錄一下，像是在下面的這種單一 software 頁面中，有多個 table 但是我只需要特定的那個怎麼辦？<br><img src="/../img/2020-07-02/DoNdgjW.jpg" srcset="/img/loading.gif" lazyload><br>可以用這種方法</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">stand = bs.find(<span class="hljs-string">&#x27;h2&#x27;</span>,text=<span class="hljs-string">&#x27;Techniques Used&#x27;</span>)<br>table_list = stand.find_next_siblings(<span class="hljs-string">&#x27;table&#x27;</span>)<br></code></pre></td></tr></table></figure>
 <h1 id="Request-的其他功能"><a href="#Request-的其他功能" class="headerlink" title="Request 的其他功能"></a>Request 的其他功能</h1><p>若在取 request 需要用 POST 的話</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">payload = ((<span class="hljs-string">&#x27;key1&#x27;</span>, <span class="hljs-string">&#x27;value1&#x27;</span>), (<span class="hljs-string">&#x27;key1&#x27;</span>, <span class="hljs-string">&#x27;value2&#x27;</span>))<br>r = requests.post(<span class="hljs-string">&#x27;http://example.tw/post&#x27;</span>, data=payload)<br></code></pre></td></tr></table></figure>
