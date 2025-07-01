@@ -1,0 +1,769 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="很多 EDR 會 hook 一些常用的、或是比較重要的一些 API 來監測行為，像是 read file、write memory、create process 之類的，只要呼叫這些 API EDR 就會知道並去檢查這些行為有沒有可疑的地方。 How to hookInline unhook直接修改 DLL 中目標 API 的內容  在 DLL function 開頭加上一段跳到 EDR 的 JM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What is DLL hooking">
+<meta property="og:url" content="https://wiiwu959.github.io/2025/07/02/2025-07-02-DLL_unhook/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="很多 EDR 會 hook 一些常用的、或是比較重要的一些 API 來監測行為，像是 read file、write memory、create process 之類的，只要呼叫這些 API EDR 就會知道並去檢查這些行為有沒有可疑的地方。 How to hookInline unhook直接修改 DLL 中目標 API 的內容  在 DLL function 開頭加上一段跳到 EDR 的 JM">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2025-07-02/api_hooking.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2025-07-02/unhook.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2025-07-02/direct_syscall.png">
+<meta property="og:image" content="https://wiiwu959.github.io/img/2025-07-02/indirect_syscall.png">
+<meta property="article:published_time" content="2025-07-01T18:58:36.000Z">
+<meta property="article:modified_time" content="2025-07-01T19:37:47.930Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="security">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wiiwu959.github.io/img/2025-07-02/api_hooking.png">
+  
+  
+  
+  <title>What is DLL hooking - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"wiiwu959.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="What is DLL hooking"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-02 02:58" pubdate>
+          July 2, 2025 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          3.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          32 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">What is DLL hooking</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>很多 EDR 會 hook 一些常用的、或是比較重要的一些 API 來監測行為，像是 read file、write memory、create process 之類的，只要呼叫這些 API EDR 就會知道並去檢查這些行為有沒有可疑的地方。</p>
+<h2 id="How-to-hook"><a href="#How-to-hook" class="headerlink" title="How to hook"></a>How to hook</h2><h3 id="Inline-unhook"><a href="#Inline-unhook" class="headerlink" title="Inline unhook"></a>Inline unhook</h3><p>直接修改 DLL 中目標 API 的內容</p>
+<ul>
+<li>在 DLL function 開頭加上一段跳到 EDR 的 JMP&#x2F;CALL</li>
+<li>所以執行流程就是 call critical API → DLL API jump → EDR function → jump back to DLL API<ul>
+<li>他會先跑去 EDR 做他要監測、記錄的那些事情，再回去原本的 API 完成原本的事</li>
+</ul>
+</li>
+</ul>
+<p>這整個事情通常是會在 process create 的時候，EDR 會把自己的 DLL inject 到 process memory 中去修改目標 dll 的 memory 內容</p>
+<ul>
+<li>他會去找到目標的 API 的 memory address 然後覆蓋他的開頭 (成 <code>JMP</code> 之類的)</li>
+</ul>
+<p>那 EDR 又是怎麼知道 process create 的？有幾種方法</p>
+<ul>
+<li><p>Windows Native API</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-tw/windows-hardware/drivers/ddi/ntddk/nf-ntddk-pssetcreateprocessnotifyroutineex">https://learn.microsoft.com/zh-tw/windows-hardware/drivers/ddi/ntddk/nf-ntddk-pssetcreateprocessnotifyroutineex</a></li>
+<li>像是 <code>PsSetCreateProcessNotifyRoutineEX</code> 或 WMI、user notification hook</li>
+</ul>
+</li>
+<li><p>AppInit_DLL</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-tw/windows/win32/dlls/secure-boot-and-appinit-dlls">https://learn.microsoft.com/zh-tw/windows/win32/dlls/secure-boot-and-appinit-dlls</a></li>
+</ul>
+<blockquote>
+<p>可讓您將自定義 DLL 載入每個互動式應用程式的位址空間，以輕鬆攔截系統 API</p>
+</blockquote>
+</li>
+<li><p>Kernel driver</p>
+<ul>
+<li>驅動層攔截或修改 API（如 ZwCreateProcess），或利用 ETW（Event Tracing for Windows）做即時追蹤，直接於 process 建立階段註入自身 DLL&#x2F;agent。</li>
+</ul>
+</li>
+<li><p>遠端注入機制 (Remote DLL Injection)</p>
+<ul>
+<li>利用 API（<code>CreateRemoteThread</code>、<code>NtWriteVirtualMemory</code>、<code>NtCreateThreadEx</code> 等）將 EDR 的監控 DLL 注入到目標 process。</li>
+<li>可直接用 C&#x2F;C++ API 複製 DLL path 進對方記憶體，創建 thread 來執行。</li>
+</ul>
+</li>
+<li><p>自動 traverse 現有執行中的 process</p>
+</li>
+</ul>
+<p><img src="/../img/2025-07-02/api_hooking.png" srcset="/img/loading.gif" lazyload alt="api_hooking.png"></p>
+<h3 id="IAT-x2F-EAT-Hook"><a href="#IAT-x2F-EAT-Hook" class="headerlink" title="IAT&#x2F;EAT Hook"></a>IAT&#x2F;EAT Hook</h3><ul>
+<li>IAT Hook (Import Address Table)：改 import table 的 pointer，讓本來要指向 A.dll 的 API 指向 EDR.dll。</li>
+<li>EAT Hook (Export Address Table): 改 export table 的 pointer，修改 DLL Export function。</li>
+</ul>
+<p>這樣就不會動到 DLL 本身而是改 table pointer，更進階一點就是去 hook kernel 層或是 syscall，但這就不在 DLL 這裡了。</p>
+<h2 id="What-is-kernel32-dll"><a href="#What-is-kernel32-dll" class="headerlink" title="What is kernel32.dll"></a>What is kernel32.dll</h2><p>是個 Windows 中常見的 DLL，包含一些基本的系統功能給 user APP 方便使用，會去 call 一些底層的 API。</p>
+<blockquote>
+<p>kernel32.dll 主要負責基本作業系統功能呼叫，例如檔案、記憶體、程序、執行緒、時間、DLL 管理，是 Windows 上應用程式與作業系統核心互動的最重要的基石之一。</p>
+</blockquote>
+<p>很多行爲會經由 ntdll.dll 再進一步與 kernel 互動。</p>
+<p><strong>常見的 API 範例</strong></p>
+<ul>
+<li>檔案管理：<ul>
+<li><code>CreateFileW</code> &#x2F; <code>ReadFile</code> &#x2F; <code>WriteFile</code> &#x2F; <code>DeleteFileW</code></li>
+</ul>
+</li>
+<li>記憶體管理：<ul>
+<li><code>VirtualAlloc</code> &#x2F; <code>VirtualFree</code> &#x2F; <code>VirtualProtect</code></li>
+</ul>
+</li>
+<li>程序與執行緒控制：<ul>
+<li><code>CreateProcessW</code> &#x2F; <code>ExitProcess</code> &#x2F; <code>CreateThread</code> &#x2F; <code>TerminateThread</code></li>
+</ul>
+</li>
+<li>系統時間&#x2F;計時：<ul>
+<li><code>GetSystemTime</code> &#x2F; <code>Sleep</code></li>
+</ul>
+</li>
+<li>DLL 載入&#x2F;管理：<ul>
+<li><code>LoadLibraryW</code> &#x2F; <code>FreeLibrary</code> &#x2F; <code>GetProcAddress</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Execution Flow</strong></p>
+<p>所以在我的理解上程式是這樣運作的</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-string">[application / exe call]</span><br>↓<br><span class="hljs-string">[kernel32.dll]</span> 做一些 user 層的處理<br>↓<br><span class="hljs-string">[ntdll.dll (Native API, 系統呼叫包裝)]</span><br>↓<br><span class="hljs-string">[System Call, 進入 kernel]</span><br>↓<br><span class="hljs-string">[Windows Kernel]</span> 執行真正在 OS 中的行為，如檔案IO、記憶體分配等<br></code></pre></td></tr></table></figure>
+
+<p>可以理解成幾乎所有 Windows 應用程式啟動都會自動載入 kernel32.dll，所以 hook ntdll.dll 或 kernel32.dll 就可以攔截到大多對系統比較有影響力的行為。</p>
+<h2 id="Solve-DLL-hook"><a href="#Solve-DLL-hook" class="headerlink" title="Solve DLL hook"></a>Solve DLL hook</h2><p>有幾種辦法，常見的有</p>
+<ol>
+<li>DLL unhook: 就是去把 DLL 還原，拿掉 hook</li>
+<li>Direct syscall: 繞過那些可能被 hook 的 DLL 直接去 call syscall</li>
+<li>Indirect syscall: 透過正常的執行 dll 去 call 到目標 syscall</li>
+</ol>
+<h3 id="Unhook"><a href="#Unhook" class="headerlink" title="Unhook"></a>Unhook</h3><p>簡單來說就是去找到 hook 的地方，以 inline hook 來說就是找到那個開頭跳去 EDR 的地方來知道這個 DLL 有沒有被 hook，然後用乾淨的 DLL (from disk &#x2F; windows cache) code 蓋回被 hook 的 code，讓 API 恢復原狀，這時候即使有執行 dll 裡的東西也不會被 EDR 看到了。</p>
+<p><img src="/../img/2025-07-02/unhook.png" srcset="/img/loading.gif" lazyload alt="unhook"></p>
+<p>還有很多後來發展的做法，有時間再補上，不過基本的 unhook 就是這麼做的。</p>
+<p><strong>ref:</strong></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++">https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck">https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/EvilBytecode/Nyx-Full-Dll-Unhook">https://github.com/EvilBytecode/Nyx-Full-Dll-Unhook</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/trickster0/LdrLoadDll-Unhooking">https://github.com/trickster0/LdrLoadDll-Unhooking</a><ul>
+<li><a target="_blank" rel="noopener" href="https://killer.wtf/2022/01/19/CustomJmpUnhook.html">https://killer.wtf/2022/01/19/CustomJmpUnhook.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fdxsec/p/18146252">https://www.cnblogs.com/fdxsec/p/18146252</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="Direct-Syscalls"><a href="#Direct-Syscalls" class="headerlink" title="Direct Syscalls"></a>Direct Syscalls</h3><p>直接呼叫 syscall，不通過 ntdll.dll 這種有被 hook 的 DLL 來執行那些重要 function</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/jthuraisamy/SysWhispers2">https://github.com/jthuraisamy/SysWhispers2</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/klezVirus/SysWhispers3">https://github.com/klezVirus/SysWhispers3</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/am0nsec/HellsGate">https://github.com/am0nsec/HellsGate</a></li>
+</ul>
+<p>會需要從 loaded ntdll.dll 中去讀地址、動態算出 syscall number 和 system service numbers (SSN)，才不用為每一個版本都重寫一次。</p>
+<p>但是還是有機會留下紀錄被偵測到，因為</p>
+<ul>
+<li>Syscall instruction 在 ntdll.dll 的 memory 外執行，不太尋常</li>
+<li>return instruction 也是</li>
+</ul>
+<p>這兩件事在 Windows 上都是 non-legitimate 的。</p>
+<p><img src="/../img/2025-07-02/direct_syscall.png" srcset="/img/loading.gif" lazyload alt="direct_syscall.png"></p>
+<h3 id="Indirect-Syscalls"><a href="#Indirect-Syscalls" class="headerlink" title="Indirect Syscalls"></a>Indirect Syscalls</h3><p>用 ntdll.dll 裡的 Native API (ex. NtOpenProcess, NtWriteVirtualMemory) 做 system call，不經過 kernel32.dll 這些上層 DLL。</p>
+<p>因為是直接在 ntdll.dll 的 memory 中執行，而且 return 也在 ntdll.dll memory 中發生 (然後指向真正要執行的 indirect syscall assembly)，前面提到 direct syscall 的缺點都解決了，不過如果 EDR 有用 ETW (Event Tracing for Windows) 還是有可能會透過 call stack 發現異常。</p>
+<p>但是如果像是 ntdll.dll 也被 hook，他還想用 ntdll.dll 去做 indirect syscall 就還是會被 EDR 看到。</p>
+<p><strong>ref</strong>: <a target="_blank" rel="noopener" href="https://0xdarkvortex.dev/hiding-in-plainsight/">https://0xdarkvortex.dev/hiding-in-plainsight/</a></p>
+<p><img src="/../img/2025-07-02/indirect_syscall.png" srcset="/img/loading.gif" lazyload alt="indirect_syscall.png"></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++">https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++</a></p>
+<p><a target="_blank" rel="noopener" href="https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls">https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck">https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/cluster/" class="category-chain-item">cluster</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/security/">#security</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>What is DLL hooking</div>
+      <div>https://wiiwu959.github.io/2025/07/02/2025-07-02-DLL_unhook/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>July 2, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/10/13/2022-10-03-SEKAI-CTF-2022/" title="SEKAI CTF 2022 writeup">
+                        <span class="hidden-mobile">SEKAI CTF 2022 writeup</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/js/hexo_resize_image.js"></script>
+<!-- hexo injector body_end end --></body>
+</html>
