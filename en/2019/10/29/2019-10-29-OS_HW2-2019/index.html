@@ -1,0 +1,717 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/en/img/favicon.png">
+  <link rel="icon" href="/en/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="This assignment requires NachOS to implement multi-programming and complete:  First-Come-First-Service scheduling (FCFS) Shortest-Job-First scheduling (SJF) Shortest Remaining Time First scheduling (S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSIE--NachOS-HW2">
+<meta property="og:url" content="https://blog.nekowu.net/en/2019/10/29/2019-10-29-OS_HW2-2019/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="This assignment requires NachOS to implement multi-programming and complete:  First-Come-First-Service scheduling (FCFS) Shortest-Job-First scheduling (SJF) Shortest Remaining Time First scheduling (S">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.nekowu.net/img/2019-10-29/Es9W7n5.jpeg">
+<meta property="og:image" content="https://blog.nekowu.net/img/2019-10-29/8itBJVC.jpg">
+<meta property="og:image" content="https://blog.nekowu.net/img/2019-10-29/yTg4P5r.jpg">
+<meta property="og:image" content="https://blog.nekowu.net/img/2019-10-29/H2QegMW.jpg">
+<meta property="article:published_time" content="2019-10-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-28T09:34:18.854Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.nekowu.net/img/2019-10-29/Es9W7n5.jpeg">
+  
+  
+  
+  <title>CSIE--NachOS-HW2 - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="/en/css/iconfont-core.css">
+
+
+
+<link rel="stylesheet" href="/en/css/iconfont-social.css">
+
+
+<link  rel="stylesheet" href="/en/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/en/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/en/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.nekowu.net","root":"/en/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/en/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/en/js/utils.js" ></script>
+  <script  src="/en/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/en/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" rel="noopener" href="https://nekowu.net">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="language-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Language">中文</a></li><li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/en/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSIE--NachOS-HW2"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-10-29 00:00" pubdate>
+          October 29, 2019 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          9.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          81 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSIE--NachOS-HW2</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>This assignment requires NachOS to implement multi-programming and complete:</p>
+<ul>
+<li>First-Come-First-Service scheduling (FCFS)</li>
+<li>Shortest-Job-First scheduling (SJF)</li>
+<li>Shortest Remaining Time First scheduling (SRTF)</li>
+</ul>
+<p>The memory-overwriting issue encountered when testing <code>Sleep</code> during the previous multi-programming assignment had already been fixed, so that was a bonus XD. This assignment was mainly about implementing the scheduling methods listed above.</p>
+<h1 id="SelfTest"><a href="#SelfTest" class="headerlink" title="SelfTest"></a>SelfTest</h1><p>The assignment instructions mention that many classes contain this feature. It allows us to test our results without using the programs under <code>/test</code>, and the teaching assistant also updated part of the code on GitHub.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/thread.cc<br><br>...<br><br><span class="hljs-comment">// Print [Name: BurstTime] for the currently running thread</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">SimpleThread</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    Thread *thread = kernel-&gt;currentThread;<br>    <span class="hljs-keyword">while</span> (thread-&gt;<span class="hljs-built_in">getBurstTime</span>() &gt; <span class="hljs-number">0</span>) &#123;<br>        thread-&gt;<span class="hljs-built_in">setBurstTime</span>(thread-&gt;<span class="hljs-built_in">getBurstTime</span>() - <span class="hljs-number">1</span>);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s: %d\n&quot;</span>, kernel-&gt;currentThread-&gt;<span class="hljs-built_in">getName</span>(), <br>                kernel-&gt;currentThread-&gt;<span class="hljs-built_in">getBurstTime</span>());<br>        kernel-&gt;interrupt-&gt;<span class="hljs-built_in">OneTick</span>();<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// Initialize the thread information, then call SimpleThread()</span><br><span class="hljs-function"><span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">Thread::SelfTest</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">DEBUG</span>(dbgThread, <span class="hljs-string">&quot;Entering Thread::SelfTest&quot;</span>);<br><br>    <span class="hljs-type">const</span> <span class="hljs-type">int</span> number     = <span class="hljs-number">3</span>;<br>    <span class="hljs-type">char</span> *name[number]   = &#123;<span class="hljs-string">&quot;A&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>, <span class="hljs-string">&quot;C&quot;</span>&#125;;<br>    <span class="hljs-type">int</span> burst[number]    = &#123;<span class="hljs-number">3</span>, <span class="hljs-number">10</span>, <span class="hljs-number">4</span>&#125;;<br>    <span class="hljs-type">int</span> priority[number] = &#123;<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>&#125;;<br>    <span class="hljs-type">int</span> arrive[number] = &#123;<span class="hljs-number">3</span>, <span class="hljs-number">0</span>, <span class="hljs-number">5</span>&#125;;<br><br>    Thread *t;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; number; i ++) &#123;<br>        t = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Thread</span>(name[i]);<br>        t-&gt;<span class="hljs-built_in">setPriority</span>(priority[i]);<br>        t-&gt;<span class="hljs-built_in">setBurstTime</span>(burst[i]);<br>        t-&gt;<span class="hljs-built_in">Fork</span>((VoidFunctionPtr) SimpleThread, (<span class="hljs-type">void</span> *)<span class="hljs-literal">NULL</span>);<br>        <span class="hljs-comment">// For SRTF, put threads that have not arrived to sleep until their arrival time</span><br>        <span class="hljs-keyword">if</span>(kernel-&gt;scheduler-&gt;<span class="hljs-built_in">getSchedulerType</span>() == SRTF)&#123;<br>            kernel-&gt;alarm-&gt;sleepList.<span class="hljs-built_in">PutToSleep</span>(t,arrive[i]);<br>        &#125;<br>    &#125;<br>    kernel-&gt;currentThread-&gt;<span class="hljs-built_in">Yield</span>();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>We also need to add the functions we use to the header file:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/thread.<span class="hljs-function">h</span><br><span class="hljs-function"></span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CheckOverflow</span><span class="hljs-params">()</span></span>;   	<span class="hljs-comment">// Check if thread stack has overflowed</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setStatus</span><span class="hljs-params">(ThreadStatus st)</span> </span>&#123; status = st; &#125;<br><span class="hljs-function"><span class="hljs-type">char</span>* <span class="hljs-title">getName</span><span class="hljs-params">()</span> </span>&#123; <span class="hljs-keyword">return</span> (name); &#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Print</span><span class="hljs-params">()</span> </span>&#123; cout &lt;&lt; name; &#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SelfTest</span><span class="hljs-params">()</span></span>;		<span class="hljs-comment">// test whether thread impl is working</span><br><br><span class="hljs-comment">// Add the following four functions</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setBurstTime</span><span class="hljs-params">(<span class="hljs-type">int</span> t)</span>	</span>&#123;burstTime = t;&#125;<br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getBurstTime</span><span class="hljs-params">()</span>		</span>&#123;<span class="hljs-keyword">return</span> burstTime;&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setPriority</span><span class="hljs-params">(<span class="hljs-type">int</span> t)</span>		</span>&#123;priority = t;&#125;<br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getPriority</span><span class="hljs-params">()</span>		</span>&#123;<span class="hljs-keyword">return</span> priority;&#125;<br><br>...<br><br>ThreadStatus status;	<span class="hljs-comment">// ready, running or blocked</span><br><span class="hljs-type">char</span>* name;<br><br><span class="hljs-comment">// Add these two fields</span><br><span class="hljs-type">int</span> burstTime;<br><span class="hljs-type">int</span> priority;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">StackAllocate</span><span class="hljs-params">(VoidFunctionPtr func, <span class="hljs-type">void</span> *arg)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>I also found an approach online that defines a separate function and then adds a call to that function in <code>SelfTest</code> in <code>/code/threads/kernel.cc</code>, but the idea is the same. <a target="_blank" rel="noopener" href="https://morris821028.github.io/2014/05/30/lesson/hw-nachos4-2/#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E6%B8%AC%E8%A9%A6">Morris’ blog</a> uses this approach.</p>
+<p>After completing this, we can run <code>./nachos</code> directly in the <code>/code/threads</code> directory, which will execute the contents of <code>SelfTest</code>.</p>
+<p>Next, we added the following section so that we can choose which method to use:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/kernel.<span class="hljs-function">cc</span><br><span class="hljs-function"></span><br><span class="hljs-function"><span class="hljs-title">ThreadedKernel::ThreadedKernel</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> **argv)</span></span><br><span class="hljs-function"></span>&#123;<br>    randomSlice = FALSE; <br>    <span class="hljs-comment">// Add this line</span><br>    type = RR;<br>    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>; i &lt; argc; i++) &#123;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;-rs&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br> 	    <span class="hljs-built_in">ASSERT</span>(i + <span class="hljs-number">1</span> &lt; argc);<br>	    <span class="hljs-built_in">RandomInit</span>(<span class="hljs-built_in">atoi</span>(argv[i + <span class="hljs-number">1</span>]));<span class="hljs-comment">// initialize pseudo-random</span><br>					                  <span class="hljs-comment">// number generator</span><br>	    randomSlice = TRUE;<br>	    i++;<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;-u&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br>            cout &lt;&lt; <span class="hljs-string">&quot;Partial usage: nachos [-rs randomSeed]\n&quot;</span>;<br>	    &#125;<br>    <span class="hljs-comment">////// Add this section for reading arguments ////////////</span><br>        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;RR&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br>            type = RR;<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;FCFS&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br>            type = FIFO;<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;PRIORITY&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br>            type = Priority;<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;SJF&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br>            type = SJF;<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(argv[i], <span class="hljs-string">&quot;SRTF&quot;</span>) == <span class="hljs-number">0</span>) &#123;<br>            type = SRTF;<br>        &#125;<br>    <span class="hljs-comment">////////////////////////////////////////</span><br>    &#125;<br>&#125;<br><br>...<br><br><span class="hljs-function"><span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">ThreadedKernel::Initialize</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    stats = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Statistics</span>();		<span class="hljs-comment">// collect statistics</span><br>    interrupt = <span class="hljs-keyword">new</span> Interrupt;		<span class="hljs-comment">// start up interrupt handling</span><br><br>    <span class="hljs-comment">// Add the type parameter to this constructor</span><br>    scheduler = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Scheduler</span>(type);	<span class="hljs-comment">// initialize the ready queue</span><br>    alarm = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Alarm</span>(randomSlice);	<span class="hljs-comment">// start up time slicing</span><br>    ...<br></code></pre></td></tr></table></figure>
+
+<p>In the <code>.h</code> file:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/kernel.h<br><br><span class="hljs-keyword">private</span>:<br>    <span class="hljs-type">bool</span> randomSlice;		<span class="hljs-comment">// enable pseudo-random time slicing</span><br>    <span class="hljs-comment">// Add this</span><br>    SchedulerType type;<br></code></pre></td></tr></table></figure>
+
+<p>This allows us to use an additional argument to select the scheduling method:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ ./nachos RR<br>$ ./nachos FCFS<br>$ ./nachos PRIORITY<br>$ ./nachos SJF<br>$ ./nachos SRTF<br></code></pre></td></tr></table></figure>
+
+<p>Next, we can actually implement the scheduling methods we need~</p>
+<h1 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h1><p>First, modify the relevant <code>.h</code> file:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/scheduler.h<br><br><span class="hljs-keyword">enum</span> <span class="hljs-title class_">SchedulerType</span> &#123;<br>    RR,     <span class="hljs-comment">// Round Robin</span><br>    SJF,<br>    Priority,<br>    FIFO,<br>    SRTF<br>&#125;;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Scheduler</span> &#123;<br>  <span class="hljs-keyword">public</span>:<br>	<span class="hljs-built_in">Scheduler</span>();		        <span class="hljs-comment">// Initialize list of ready threads </span><br>	<span class="hljs-built_in">Scheduler</span>(SchedulerType type); <span class="hljs-comment">// This needs to be changed to add a parameter</span><br>	~<span class="hljs-built_in">Scheduler</span>();				<span class="hljs-comment">// De-allocate ready list</span><br><br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ReadyToRun</span><span class="hljs-params">(Thread* thread)</span></span>;	<br>				                <span class="hljs-comment">// Thread can be dispatched.</span><br>	<span class="hljs-function">Thread* <span class="hljs-title">FindNextToRun</span><span class="hljs-params">()</span></span>;	<span class="hljs-comment">// Dequeue first thread on the ready </span><br>					            <span class="hljs-comment">// list, if any, and return thread.</span><br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Run</span><span class="hljs-params">(Thread* nextThread, <span class="hljs-type">bool</span> finishing)</span></span>;<br>	    				        <span class="hljs-comment">// Cause nextThread to start running</span><br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CheckToBeDestroyed</span><span class="hljs-params">()</span></span>;	<span class="hljs-comment">// Check if thread that had been</span><br>    					        <span class="hljs-comment">// running needs to be deleted</span><br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Print</span><span class="hljs-params">()</span></span>;			    <span class="hljs-comment">// Print contents of ready list</span><br><br>    <span class="hljs-comment">// Add these</span><br>    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setSchedulerType</span><span class="hljs-params">(SchedulerType t)</span> </span>&#123;schedulerType = t;&#125;<br>	<span class="hljs-function">SchedulerType <span class="hljs-title">getSchedulerType</span><span class="hljs-params">()</span> </span>&#123;<span class="hljs-keyword">return</span> schedulerType;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>The main changes are made here! We create different <code>ReadyList</code>s according to the scheduling method.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/scheduler.cc<br><br><span class="hljs-comment">// Add comparison functions (used when creating a sorted list)</span><br><span class="hljs-comment">//----------------------------------------------------------------------</span><br><span class="hljs-comment">// Compare function</span><br><span class="hljs-comment">//----------------------------------------------------------------------</span><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">PriorityCompare</span><span class="hljs-params">(Thread *a, Thread *b)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span>(a-&gt;<span class="hljs-built_in">getPriority</span>() == b-&gt;<span class="hljs-built_in">getPriority</span>())<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">return</span> a-&gt;<span class="hljs-built_in">getPriority</span>() &gt; b-&gt;<span class="hljs-built_in">getPriority</span>() ? <span class="hljs-number">1</span> : <span class="hljs-number">-1</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">FIFOCompare</span><span class="hljs-params">(Thread *a, Thread *b)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">SJFCompare</span><span class="hljs-params">(Thread *a, Thread *b)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span>(a-&gt;<span class="hljs-built_in">getBurstTime</span>() == b-&gt;<span class="hljs-built_in">getBurstTime</span>())<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">return</span> a-&gt;<span class="hljs-built_in">getBurstTime</span>() &gt; b-&gt;<span class="hljs-built_in">getBurstTime</span>() ? <span class="hljs-number">1</span> : <span class="hljs-number">-1</span>;<br>&#125;<br><br><span class="hljs-comment">//----------------------------------------------------------------------</span><br><span class="hljs-comment">// Scheduler::Scheduler</span><br><span class="hljs-comment">// 	Initialize the list of ready but not running threads.</span><br><span class="hljs-comment">//	Initially, no ready threads.</span><br><span class="hljs-comment">//----------------------------------------------------------------------</span><br><br>Scheduler::<span class="hljs-built_in">Scheduler</span>()<br>&#123; <br>	<span class="hljs-built_in">Scheduler</span>(RR);<br>&#125;<br><br><span class="hljs-comment">// This is essentially the only part that needs to be implemented manually</span><br>Scheduler::<span class="hljs-built_in">Scheduler</span>(SchedulerType type)<br>&#123;<br>	schedulerType = type;<br>	<span class="hljs-keyword">switch</span>(schedulerType) &#123;<br>        <span class="hljs-keyword">case</span> RR:<br>            readyList = <span class="hljs-keyword">new</span> List&lt;Thread *&gt;;<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> SJF:<br>            readyList = <span class="hljs-keyword">new</span> <span class="hljs-built_in">SortedList</span>&lt;Thread *&gt;(SJFCompare);<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> Priority:<br>            readyList = <span class="hljs-keyword">new</span> <span class="hljs-built_in">SortedList</span>&lt;Thread *&gt;(PriorityCompare);<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> FIFO:<br>            readyList = <span class="hljs-keyword">new</span> <span class="hljs-built_in">SortedList</span>&lt;Thread *&gt;(FIFOCompare);<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> SRTF:<br>            <span class="hljs-comment">// This is essentially the same as SJF; the only difference is whether it is preemptive</span><br>            readyList = <span class="hljs-keyword">new</span> <span class="hljs-built_in">SortedList</span>&lt;Thread *&gt;(SJFCompare);<br>            <span class="hljs-keyword">break</span>;<br>   	&#125;<br>	toBeDestroyed = <span class="hljs-literal">NULL</span>;<br>&#125;	 <br></code></pre></td></tr></table></figure>
+
+<p>SRTF is preemptive, so it is more complicated. We need to further modify the previously completed <code>Sleep</code> implementation so that it can be used directly by our scheduler.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/alarm.cc<br><br><span class="hljs-comment">// Further modify the original PutToSleep</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">SleepList::PutToSleep</span><span class="hljs-params">(Thread*t, <span class="hljs-type">int</span> x)</span></span><br><span class="hljs-function"></span>&#123;<br>    IntStatus oldLevel = kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(IntOff); <span class="hljs-comment">// Prevent other threads from interrupting</span><br>    <span class="hljs-built_in">ASSERT</span>(kernel-&gt;interrupt-&gt;<span class="hljs-built_in">getLevel</span>() == IntOff);		  <span class="hljs-comment">// check if it cannot be interrupt.</span><br>    threadlist.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">SleepThread</span>(t, counter + x));        <span class="hljs-comment">// put into the list</span><br>    <span class="hljs-keyword">if</span>(kernel-&gt;scheduler-&gt;<span class="hljs-built_in">getSchedulerType</span>() != SRTF)&#123;<br>    	t-&gt;<span class="hljs-built_in">Sleep</span>(<span class="hljs-literal">false</span>);<br>    &#125;<br>    kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(oldLevel);<br>&#125;<br><br><span class="hljs-comment">// Also disable interrupts at the beginning and end of PutToReady</span><br><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">SleepList::PutToReady</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    IntStatus oldLevel = kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(IntOff);<br>    ...<br>    ...<br>    kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(oldLevel);<br>    <span class="hljs-keyword">return</span> woken;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Disable <code>ReadyToRun</code> for SRTF in <code>Fork</code>.</p>
+<p>We also need to add a check in <code>Yield</code> to determine which the next thread is and whether it will be preempted.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs c++">/code/threads/thread.<span class="hljs-function">cc</span><br><span class="hljs-function"></span><br><span class="hljs-function"><span class="hljs-type">void</span> </span><br><span class="hljs-function"><span class="hljs-title">Thread::Fork</span><span class="hljs-params">(VoidFunctionPtr func, <span class="hljs-type">void</span> *arg)</span></span><br><span class="hljs-function"></span>&#123;<br>    Interrupt *interrupt = kernel-&gt;interrupt;<br>    Scheduler *scheduler = kernel-&gt;scheduler;<br>    IntStatus oldLevel;<br>    <br>    <span class="hljs-built_in">DEBUG</span>(dbgThread, <span class="hljs-string">&quot;Forking thread: &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot; f(a): &quot;</span> &lt;&lt; (<span class="hljs-type">int</span>) func &lt;&lt; <span class="hljs-string">&quot; &quot;</span> &lt;&lt; arg);<br>    <br>    <span class="hljs-built_in">StackAllocate</span>(func, arg);<br><br>    oldLevel = interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(IntOff);<br><br>    <span class="hljs-keyword">if</span>(scheduler-&gt;<span class="hljs-built_in">getSchedulerType</span>() != SRTF)&#123; <span class="hljs-comment">// It may not run immediately after being forked</span><br>        scheduler-&gt;<span class="hljs-built_in">ReadyToRun</span>(<span class="hljs-keyword">this</span>);	<span class="hljs-comment">// ReadyToRun assumes that interrupts are disabled!</span><br>    &#125;<br>    (<span class="hljs-type">void</span>) interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(oldLevel);<br>&#125; <br><br><br><span class="hljs-function"><span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">Thread::Yield</span> <span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    Thread *nextThread;<br>    IntStatus oldLevel = kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(IntOff);<br>    <br>    <span class="hljs-built_in">ASSERT</span>(<span class="hljs-keyword">this</span> == kernel-&gt;currentThread);<br>    <br>    <span class="hljs-built_in">DEBUG</span>(dbgThread, <span class="hljs-string">&quot;Yielding thread: &quot;</span> &lt;&lt; name);<br><br>    nextThread = kernel-&gt;scheduler-&gt;<span class="hljs-built_in">FindNextToRun</span>();<br>    <span class="hljs-comment">// Change this section//////////////////////////////////////////////////</span><br>    <span class="hljs-keyword">if</span> (nextThread != <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-comment">// Because this is preemptive, every yield must check whether preemption will occur</span><br>        <span class="hljs-comment">// It may not be preempted, so nextThread cannot be sent directly to ReadyToRun as with the other scheduling methods</span><br>        <span class="hljs-keyword">if</span>(kernel-&gt;scheduler-&gt;<span class="hljs-built_in">getSchedulerType</span>() == SRTF)&#123;	<br>            <span class="hljs-keyword">if</span>(nextThread-&gt;<span class="hljs-built_in">getBurstTime</span>() &lt; <span class="hljs-keyword">this</span>-&gt;<span class="hljs-built_in">getBurstTime</span>())&#123;<br>                kernel-&gt;scheduler-&gt;<span class="hljs-built_in">ReadyToRun</span>(<span class="hljs-keyword">this</span>);<br>                kernel-&gt;scheduler-&gt;<span class="hljs-built_in">Run</span>(nextThread, FALSE);<br>            &#125;<br>            <span class="hljs-keyword">else</span>&#123;<br>                kernel-&gt;scheduler-&gt;<span class="hljs-built_in">ReadyToRun</span>(nextThread);<br>            &#125;<br>	    &#125;<br>	    <span class="hljs-keyword">else</span>&#123;<br>            kernel-&gt;scheduler-&gt;<span class="hljs-built_in">ReadyToRun</span>(<span class="hljs-keyword">this</span>);<br>            kernel-&gt;scheduler-&gt;<span class="hljs-built_in">Run</span>(nextThread, FALSE);<br>	    &#125;<br>    &#125;<br>    <span class="hljs-comment">////////////////////////////////////////////////////////////////</span><br>    (<span class="hljs-type">void</span>) kernel-&gt;interrupt-&gt;<span class="hljs-built_in">SetLevel</span>(oldLevel);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Done!</p>
+<h1 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h1><h2 id="Using-SelfTest"><a href="#Using-SelfTest" class="headerlink" title="Using SelfTest"></a>Using SelfTest</h2><ul>
+<li>SJF<br>)<img src="/en/../img/2019-10-29/Es9W7n5.jpeg" srcset="/en/img/loading.gif" lazyload></li>
+<li>SRTF<br><img src="/en/../img/2019-10-29/8itBJVC.jpg" srcset="/en/img/loading.gif" lazyload></li>
+</ul>
+<h2 id="Using-userprog"><a href="#Using-userprog" class="headerlink" title="Using userprog"></a>Using userprog</h2><ul>
+<li>FCFS</li>
+</ul>
+<p><img src="/en/../img/2019-10-29/yTg4P5r.jpg" srcset="/en/img/loading.gif" lazyload></p>
+<p><img src="/en/../img/2019-10-29/H2QegMW.jpg" srcset="/en/img/loading.gif" lazyload></p>
+<blockquote>
+<p><em>Translated by AI.</em></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/en/categories/homework/" class="category-chain-item">homework</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/en/tags/OS/">#OS</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSIE--NachOS-HW2</div>
+      <div>https://blog.nekowu.net/en/2019/10/29/2019-10-29-OS_HW2-2019/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>October 29, 2019</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/en/2019/12/09/2019-12-09-OS-HW3-2019/" title="CSIE--NachOS-HW3">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CSIE--NachOS-HW3</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/en/2019/10/10/2019-10-10-OS_HW1-2019/" title="CSIE--NachOS-HW1">
+                        <span class="hidden-mobile">CSIE--NachOS-HW1</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/en/js/events.js" ></script>
+<script  src="/en/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/en/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/en/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/en/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/en/js/hexo_resize_image.js"></script>
+  <script>
+    (() => {
+      const button = document.getElementById('language-toggle-btn');
+      if (!button) return;
+      button.addEventListener('click', () => {
+        const path = window.location.pathname;
+        const target = path === '/en' || path === '/en/'
+          ? '/'
+          : path.startsWith('/en/')
+            ? path.slice(3)
+            : '/en' + path;
+        window.location.assign(target + window.location.search + window.location.hash);
+      });
+    })();
+  </script>
+<!-- hexo injector body_end end --></body>
+</html>

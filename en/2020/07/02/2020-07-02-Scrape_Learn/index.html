@@ -1,0 +1,749 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/en/img/favicon.png">
+  <link rel="icon" href="/en/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Today is my second day of my internship, and my senior asked me to crawl a webpage. Previously, my understanding of web crawlers was limited to what Senior Hank had explained. I spent a little over te">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web Crawler Note">
+<meta property="og:url" content="https://blog.nekowu.net/en/2020/07/02/2020-07-02-Scrape_Learn/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="Today is my second day of my internship, and my senior asked me to crawl a webpage. Previously, my understanding of web crawlers was limited to what Senior Hank had explained. I spent a little over te">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.nekowu.net/img/2020-07-02/C9wp6jl.jpg">
+<meta property="og:image" content="https://blog.nekowu.net/img/2020-07-02/jq3dqtK.jpg">
+<meta property="og:image" content="https://blog.nekowu.net/img/2020-07-02/DoNdgjW.jpg">
+<meta property="article:published_time" content="2020-07-01T23:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-28T09:36:35.153Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="crawler">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.nekowu.net/img/2020-07-02/C9wp6jl.jpg">
+  
+  
+  
+  <title>Web Crawler Note - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="/en/css/iconfont-core.css">
+
+
+
+<link rel="stylesheet" href="/en/css/iconfont-social.css">
+
+
+<link  rel="stylesheet" href="/en/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/en/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/en/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.nekowu.net","root":"/en/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/en/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/en/js/utils.js" ></script>
+  <script  src="/en/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/en/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" rel="noopener" href="https://nekowu.net">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="language-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Language">中文</a></li><li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/en/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Web Crawler Note"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-07-02 00:00" pubdate>
+          July 2, 2020 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          39 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Web Crawler Note</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Today is my second day of my internship, and my senior asked me to crawl a webpage. Previously, my understanding of web crawlers was limited to what Senior Hank had explained. I spent a little over ten minutes looking into it, then another ten minutes crawling the data, and afterward I had no idea what to do… So I thought I might as well organize what I learned here, so that next time I forget, I can come back and look it up directly.</p>
+<p>A web crawler uses a program to retrieve content that would normally be sent to a browser and processed for people to view, then organizes it into the format we need. Here, I will use the MITRE website, which I recently needed to crawl, as an example, specifically the MITRE Software page!</p>
+<h1 id="Crawling-Webpage-Content"><a href="#Crawling-Webpage-Content" class="headerlink" title="Crawling Webpage Content"></a>Crawling Webpage Content</h1><p>First, import the required packages.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> requests<br><span class="hljs-keyword">from</span> bs4 <span class="hljs-keyword">import</span> BeautifulSoup<br></code></pre></td></tr></table></figure>
+<p>Fetch the website.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">resp = requests.get(<span class="hljs-string">&quot;https://attack.mitre.org/software/&quot;</span>)<br>bs = BeautifulSoup(resp.text,<span class="hljs-string">&#x27;html.parser&#x27;</span>)<br></code></pre></td></tr></table></figure>
+<p><code>requests.get</code> above directly obtains the complete response. <code>print(resp)</code> prints the HTTP Status Code, while <code>resp.text</code> retrieves the webpage content. BeautifulSoup is a tool that makes it convenient for us to break down webpage content, so here we simply feed the webpage content to it first.</p>
+<p>If you need to print the HTML in a more human-readable format:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.prettify())<br></code></pre></td></tr></table></figure>
+
+<h1 id="Organizing-Data"><a href="#Organizing-Data" class="headerlink" title="Organizing Data"></a>Organizing Data</h1><p>To organize webpage data, you first need to observe its structure and identify the content you want to crawl.</p>
+<p>Here, we will use crawling all the Software names on the Software page as an example. The webpage looks like this:<br><img src="/en/../img/2020-07-02/C9wp6jl.jpg" srcset="/en/img/loading.gif" lazyload></p>
+<p>To obtain the large <code>Software</code> heading on this webpage, you can first look at its source code and see that the heading is enclosed by the <code>&lt;h1&gt;&lt;/h1&gt;</code> tag. Therefore, you can retrieve it like this:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.h1)<br></code></pre></td></tr></table></figure>
+
+<p>The method above prints the complete tag along with its contents. You can also retrieve only the text and remove leading and trailing whitespace:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.h1.text.strip())<br></code></pre></td></tr></table></figure>
+
+<p>The methods above can only retrieve the first tag node. Therefore, when we want to retrieve content from the table and get all <code>&lt;td&gt;</code> elements, we need to use:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(bs.table.find_all(<span class="hljs-string">&#x27;td&#x27;</span>))<br></code></pre></td></tr></table></figure>
+
+<p>The returned format is a list containing all the <code>&lt;td&gt;</code> content on the webpage. After cleaning it up a little, we can obtain the software name list:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python">software_name = []<br>software_table = bs.table.find_all(<span class="hljs-string">&#x27;td&#x27;</span>)<br><span class="hljs-keyword">while</span> software_table:<br>    software_name.append(software_table[<span class="hljs-number">0</span>].a.text.strip())<br>    software_table = software_table[<span class="hljs-number">3</span>:]<br><span class="hljs-built_in">print</span>(software_name)<br></code></pre></td></tr></table></figure>
+<p><img src="/en/../img/2020-07-02/jq3dqtK.jpg" srcset="/en/img/loading.gif" lazyload></p>
+<p>If you need to retrieve other content, such as the <code>href</code> in an <code>&lt;a&gt;</code> element, you can obtain it like this:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">software_table<span class="hljs-selector-attr">[0]</span><span class="hljs-selector-class">.a</span><span class="hljs-selector-attr">[<span class="hljs-string">&#x27;href&#x27;</span>]</span><br></code></pre></td></tr></table></figure>
+
+<p>Finally, a note about a situation like the following: on a single Software page, there are multiple tables, but what should you do if you only need a specific one?<br><img src="/en/../img/2020-07-02/DoNdgjW.jpg" srcset="/en/img/loading.gif" lazyload></p>
+<p>You can use this method:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">stand = bs.find(<span class="hljs-string">&#x27;h2&#x27;</span>,text=<span class="hljs-string">&#x27;Techniques Used&#x27;</span>)<br>table_list = stand.find_next_siblings(<span class="hljs-string">&#x27;table&#x27;</span>)<br></code></pre></td></tr></table></figure>
+
+<h1 id="Other-Request-Features"><a href="#Other-Request-Features" class="headerlink" title="Other Request Features"></a>Other Request Features</h1><p>If you need to use POST when making a request:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">payload = ((<span class="hljs-string">&#x27;key1&#x27;</span>, <span class="hljs-string">&#x27;value1&#x27;</span>), (<span class="hljs-string">&#x27;key1&#x27;</span>, <span class="hljs-string">&#x27;value2&#x27;</span>))<br>r = requests.post(<span class="hljs-string">&#x27;http://example.tw/post&#x27;</span>, data=payload)<br></code></pre></td></tr></table></figure>
+
+<p>If you need to add cookies:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">requests.get(<span class="hljs-string">&#x27;https://www.example.tw/index.html&#x27;</span>,cookies=&#123;<span class="hljs-string">&#x27;key&#x27;</span>:<span class="hljs-string">&#x27;value&#x27;</span>&#125;)<br></code></pre></td></tr></table></figure>
+
+<h1 id="Some-dict-Basics"><a href="#Some-dict-Basics" class="headerlink" title="Some dict Basics"></a>Some dict Basics</h1><p>Create a dict:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">software_name = &#123;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Insert data—for example, with a serial number as the key and the software name as the value:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(software_table)):<br>    software_name[i] = software[i]<br></code></pre></td></tr></table></figure>
+
+<p>To read the data in the dict one item at a time:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">for</span> num, software <span class="hljs-keyword">in</span> software_name.items():<br>    <span class="hljs-built_in">print</span>(num + <span class="hljs-string">&#x27;:&#x27;</span> + software + <span class="hljs-string">&#x27;\n&#x27;</span>)<br></code></pre></td></tr></table></figure>
+
+<h1 id="Some-Things-Used-When-Generating-JSON"><a href="#Some-Things-Used-When-Generating-JSON" class="headerlink" title="Some Things Used When Generating JSON"></a>Some Things Used When Generating JSON</h1><p>First, import json:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> json<br></code></pre></td></tr></table></figure>
+
+<p>Directly package the data as a dict and output it:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;software_name.json&#x27;</span>, <span class="hljs-string">&#x27;w&#x27;</span>) <span class="hljs-keyword">as</span> fp:<br>    json.dump(software_name, fp)<br></code></pre></td></tr></table></figure>
+
+<p>Make the output easier to read:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(json.dumps(software_name, indent=<span class="hljs-number">4</span>, sort_keys=<span class="hljs-literal">True</span>))<br></code></pre></td></tr></table></figure>
+
+<h1 id="Commonly-Used-Items-in-the-os-Package"><a href="#Commonly-Used-Items-in-the-os-Package" class="headerlink" title="Commonly Used Items in the os Package"></a>Commonly Used Items in the os Package</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> os<br></code></pre></td></tr></table></figure>
+
+<p>Check whether a path exists:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">os.path.exists(path)<br></code></pre></td></tr></table></figure>
+
+<p>Check whether a file exists:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">os.path.isfile(path + filename)<br></code></pre></td></tr></table></figure>
+
+<p>Separate the filename and extension. This returns a list: <code>[&#39;檔名&#39;, &#39;副檔名&#39;]</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">os.path.splitext(path)<br></code></pre></td></tr></table></figure>
+
+<p>List everything under a folder:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">os.listdir(path)<br></code></pre></td></tr></table></figure>
+
+<p>There are two ways to create a folder. The one with an <code>s</code> creates the entire path, while the other requires the preceding directories to already exist and creates only the final directory. If the preceding directories do not exist, it will produce an error:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">os.mkdir(save_path)<br>os.mkdirs(save_path)<br></code></pre></td></tr></table></figure>
+
+<h1 id="That’s-It"><a href="#That’s-It" class="headerlink" title="That’s It"></a>That’s It</h1><p>My senior’s lecture notes were really exceptionally clear. Looking up the details on Google afterward made everything quite complete. Python is really easy to get started with and has a low barrier to entry, so writing a web crawler is also quite easy. As long as you can understand the structure, collecting large amounts of webpage data becomes very simple. I hope I can be assigned some new work later. Although having such a relaxed workload is pretty nice too… I can just work on my own things.</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/kehanlu/python">Hank Lu &#x2F; Python Introduction</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.gtwang.org/programming/python-requests-module-tutorial/">Using Python’s requests Module to Make HTTP Requests and Download Webpage Data: A Tutorial</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.gtwang.org/programming/python-beautiful-soup-module-scrape-web-pages-tutorial/">Using Python’s Beautiful Soup to Scrape and Parse Webpage Data: A Tutorial on Developing Web Crawlers</a></li>
+</ul>
+<blockquote>
+<p><em>Translated by AI.</em></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/en/categories/note/" class="category-chain-item">note</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/en/tags/python/">#python</a>
+      
+        <a href="/en/tags/crawler/">#crawler</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Web Crawler Note</div>
+      <div>https://blog.nekowu.net/en/2020/07/02/2020-07-02-Scrape_Learn/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>July 2, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/en/2021/07/07/2021-07-07-CVE-2021-21972/" title="CVE-2021-21972 VMware vCenter Server">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CVE-2021-21972 VMware vCenter Server</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/en/2020/05/06/2020-05-06-Stego_Collation/" title="The Ninjutsu of Steganography">
+                        <span class="hidden-mobile">The Ninjutsu of Steganography</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/en/js/events.js" ></script>
+<script  src="/en/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/en/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/en/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/en/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/en/js/hexo_resize_image.js"></script>
+  <script>
+    (() => {
+      const button = document.getElementById('language-toggle-btn');
+      if (!button) return;
+      button.addEventListener('click', () => {
+        const path = window.location.pathname;
+        const target = path === '/en' || path === '/en/'
+          ? '/'
+          : path.startsWith('/en/')
+            ? path.slice(3)
+            : '/en' + path;
+        window.location.assign(target + window.location.search + window.location.hash);
+      });
+    })();
+  </script>
+<!-- hexo injector body_end end --></body>
+</html>

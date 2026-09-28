@@ -1,0 +1,787 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/en/img/favicon.png">
+  <link rel="icon" href="/en/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Many EDRs hook commonly used or otherwise important APIs to monitor behavior, such as reading files, writing to memory, and creating processes. Whenever these APIs are called, the EDR becomes aware of">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What is DLL hooking">
+<meta property="og:url" content="https://blog.nekowu.net/en/2025/07/02/2025-07-02-DLL_unhook/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="Many EDRs hook commonly used or otherwise important APIs to monitor behavior, such as reading files, writing to memory, and creating processes. Whenever these APIs are called, the EDR becomes aware of">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.nekowu.net/img/2025-07-02/api_hooking.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2025-07-02/unhook.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2025-07-02/direct_syscall.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2025-07-02/indirect_syscall.png">
+<meta property="article:published_time" content="2025-07-02T01:58:36.000Z">
+<meta property="article:modified_time" content="2026-09-28T09:45:11.537Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="security">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.nekowu.net/img/2025-07-02/api_hooking.png">
+  
+  
+  
+  <title>What is DLL hooking - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="/en/css/iconfont-core.css">
+
+
+
+<link rel="stylesheet" href="/en/css/iconfont-social.css">
+
+
+<link  rel="stylesheet" href="/en/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/en/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/en/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.nekowu.net","root":"/en/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/en/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/en/js/utils.js" ></script>
+  <script  src="/en/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/en/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" rel="noopener" href="https://nekowu.net">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="language-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Language">中文</a></li><li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/en/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="What is DLL hooking"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-07-02 02:58" pubdate>
+          July 2, 2025 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          50 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">What is DLL hooking</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>Many EDRs hook commonly used or otherwise important APIs to monitor behavior, such as reading files, writing to memory, and creating processes. Whenever these APIs are called, the EDR becomes aware of them and checks whether the behavior is suspicious.</p>
+<h2 id="How-to-hook"><a href="#How-to-hook" class="headerlink" title="How to hook"></a>How to hook</h2><h3 id="Inline-unhook"><a href="#Inline-unhook" class="headerlink" title="Inline unhook"></a>Inline unhook</h3><p>Directly modify the contents of the target API in a DLL.</p>
+<ul>
+<li>Add a JMP&#x2F;CALL instruction at the beginning of the DLL function to jump to the EDR.</li>
+<li>The execution flow is therefore: call critical API → DLL API jump → EDR function → jump back to DLL API<ul>
+<li>It first goes to the EDR to perform the monitoring and logging it needs to do, then returns to the original API to complete its intended operation.</li>
+</ul>
+</li>
+</ul>
+<p>This usually happens when a process is created: the EDR injects its own DLL into the process memory and modifies the memory contents of the target DLL.</p>
+<ul>
+<li>It locates the memory address of the target API and overwrites its beginning with something like a <code>JMP</code>.</li>
+</ul>
+<p>How does the EDR know when a process is created? There are several methods:</p>
+<ul>
+<li><p>Windows Native API</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-tw/windows-hardware/drivers/ddi/ntddk/nf-ntddk-pssetcreateprocessnotifyroutineex">https://learn.microsoft.com/zh-tw/windows-hardware/drivers/ddi/ntddk/nf-ntddk-pssetcreateprocessnotifyroutineex</a></li>
+<li>Such as <code>PsSetCreateProcessNotifyRoutineEX</code>, WMI, or user notification hooks</li>
+</ul>
+</li>
+<li><p>AppInit_DLL</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-tw/windows/win32/dlls/secure-boot-and-appinit-dlls">https://learn.microsoft.com/zh-tw/windows/win32/dlls/secure-boot-and-appinit-dlls</a></li>
+</ul>
+<blockquote>
+<p>Allows you to load a custom DLL into the address space of every interactive application, making it easy to intercept system APIs.</p>
+</blockquote>
+</li>
+<li><p>Kernel driver</p>
+<ul>
+<li>Intercept or modify APIs at the driver layer, such as ZwCreateProcess, or use ETW (Event Tracing for Windows) for real-time tracing. It can also inject its own DLL&#x2F;agent directly during the process creation stage.</li>
+</ul>
+</li>
+<li><p>Remote injection mechanism (Remote DLL Injection)</p>
+<ul>
+<li>Use APIs such as <code>CreateRemoteThread</code>, <code>NtWriteVirtualMemory</code>, and <code>NtCreateThreadEx</code> to inject the EDR’s monitoring DLL into the target process.</li>
+<li>C&#x2F;C++ APIs can be used to copy the DLL path into the other process’s memory and create a thread to execute it.</li>
+</ul>
+</li>
+<li><p>Automatically traverse existing running processes</p>
+</li>
+</ul>
+<p><img src="/en/../img/2025-07-02/api_hooking.png" srcset="/en/img/loading.gif" lazyload alt="api_hooking.png"></p>
+<h3 id="IAT-x2F-EAT-Hook"><a href="#IAT-x2F-EAT-Hook" class="headerlink" title="IAT&#x2F;EAT Hook"></a>IAT&#x2F;EAT Hook</h3><ul>
+<li>IAT Hook (Import Address Table): Modify the pointers in the import table so that an API that originally pointed to A.dll points to EDR.dll instead.</li>
+<li>EAT Hook (Export Address Table): Modify the pointers in the export table to alter the DLL export function.</li>
+</ul>
+<p>This does not modify the DLL itself; instead, it modifies the table pointers. A more advanced approach is to hook the kernel layer or syscalls, but that is outside the scope of DLLs here.</p>
+<h2 id="What-is-kernel32-dll"><a href="#What-is-kernel32-dll" class="headerlink" title="What is kernel32.dll"></a>What is kernel32.dll</h2><p>It is a commonly used DLL in Windows that provides basic system functionality for user applications and calls some lower-level APIs.</p>
+<blockquote>
+<p>kernel32.dll is primarily responsible for basic operating system functions, such as file, memory, process, thread, time, and DLL management. It is one of the most important foundations for interaction between applications and the operating system kernel on Windows.</p>
+</blockquote>
+<p>Many operations go through ntdll.dll before interacting further with the kernel.</p>
+<p><strong>Common API examples</strong></p>
+<ul>
+<li>File management:<ul>
+<li><code>CreateFileW</code> &#x2F; <code>ReadFile</code> &#x2F; <code>WriteFile</code> &#x2F; <code>DeleteFileW</code></li>
+</ul>
+</li>
+<li>Memory management:<ul>
+<li><code>VirtualAlloc</code> &#x2F; <code>VirtualFree</code> &#x2F; <code>VirtualProtect</code></li>
+</ul>
+</li>
+<li>Process and thread control:<ul>
+<li><code>CreateProcessW</code> &#x2F; <code>ExitProcess</code> &#x2F; <code>CreateThread</code> &#x2F; <code>TerminateThread</code></li>
+</ul>
+</li>
+<li>System time&#x2F;timing:<ul>
+<li><code>GetSystemTime</code> &#x2F; <code>Sleep</code></li>
+</ul>
+</li>
+<li>DLL loading&#x2F;management:<ul>
+<li><code>LoadLibraryW</code> &#x2F; <code>FreeLibrary</code> &#x2F; <code>GetProcAddress</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>Execution Flow</strong></p>
+<p>Therefore, my understanding is that a program operates as follows:</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-string">[application / exe call]</span><br>↓<br><span class="hljs-string">[kernel32.dll]</span> 做一些 user 層的處理<br>↓<br><span class="hljs-string">[ntdll.dll (Native API, 系統呼叫包裝)]</span><br>↓<br><span class="hljs-string">[System Call, 進入 kernel]</span><br>↓<br><span class="hljs-string">[Windows Kernel]</span> 執行真正在 OS 中的行為，如檔案IO、記憶體分配等<br></code></pre></td></tr></table></figure>
+
+<p>It can be understood that almost all Windows applications automatically load kernel32.dll when they start. Therefore, hooking ntdll.dll or kernel32.dll makes it possible to intercept most behaviors that have a significant impact on the system.</p>
+<h2 id="Solve-DLL-hook"><a href="#Solve-DLL-hook" class="headerlink" title="Solve DLL hook"></a>Solve DLL hook</h2><p>There are several approaches. Common ones include:</p>
+<ol>
+<li>DLL unhook: Restore the DLL and remove the hook.</li>
+<li>Direct syscall: Bypass DLLs that may be hooked and call the syscall directly.</li>
+<li>Indirect syscall: Use a legitimate DLL execution path to call the target syscall.</li>
+</ol>
+<h3 id="Unhook"><a href="#Unhook" class="headerlink" title="Unhook"></a>Unhook</h3><p>Simply put, this involves finding the location of the hook. In the case of an inline hook, this means finding the jump at the beginning that redirects execution to the EDR to determine whether the DLL has been hooked. Then, overwrite the hooked code with code from a clean DLL (from disk &#x2F; Windows cache) to restore the API to its original state. At this point, even if something in the DLL is executed, the EDR will not see it.</p>
+<p><img src="/en/../img/2025-07-02/unhook.png" srcset="/en/img/loading.gif" lazyload alt="unhook"></p>
+<p>Many techniques have been developed since then. I may add more when I have time, but this is essentially how a basic unhook works.</p>
+<p><strong>ref:</strong></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++">https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck">https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/EvilBytecode/Nyx-Full-Dll-Unhook">https://github.com/EvilBytecode/Nyx-Full-Dll-Unhook</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/trickster0/LdrLoadDll-Unhooking">https://github.com/trickster0/LdrLoadDll-Unhooking</a><ul>
+<li><a target="_blank" rel="noopener" href="https://killer.wtf/2022/01/19/CustomJmpUnhook.html">https://killer.wtf/2022/01/19/CustomJmpUnhook.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fdxsec/p/18146252">https://www.cnblogs.com/fdxsec/p/18146252</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="Direct-Syscalls"><a href="#Direct-Syscalls" class="headerlink" title="Direct Syscalls"></a>Direct Syscalls</h3><p>Call syscalls directly, without going through a hooked DLL such as ntdll.dll to execute those important functions.</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/jthuraisamy/SysWhispers2">https://github.com/jthuraisamy/SysWhispers2</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/klezVirus/SysWhispers3">https://github.com/klezVirus/SysWhispers3</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/am0nsec/HellsGate">https://github.com/am0nsec/HellsGate</a></li>
+</ul>
+<p>This requires reading addresses from the loaded ntdll.dll and dynamically calculating the syscall number and system service numbers (SSN), so the code does not need to be rewritten for every version.</p>
+<p>However, there is still a chance of leaving traces and being detected because:</p>
+<ul>
+<li>The syscall instruction executes outside the memory of ntdll.dll, which is unusual.</li>
+<li>The return instruction does as well.</li>
+</ul>
+<p>Both of these are considered non-legitimate on Windows.</p>
+<p><img src="/en/../img/2025-07-02/direct_syscall.png" srcset="/en/img/loading.gif" lazyload alt="direct_syscall.png"></p>
+<h3 id="Indirect-Syscalls"><a href="#Indirect-Syscalls" class="headerlink" title="Indirect Syscalls"></a>Indirect Syscalls</h3><p>Use the Native APIs in ntdll.dll, such as NtOpenProcess and NtWriteVirtualMemory, to make system calls without going through higher-level DLLs such as kernel32.dll.</p>
+<p>Because execution occurs directly in the memory of ntdll.dll, and the return also occurs in ntdll.dll memory before pointing to the indirect syscall assembly that actually needs to execute, the disadvantages of direct syscalls mentioned above are resolved. However, if the EDR uses ETW (Event Tracing for Windows), it may still discover anomalies through the call stack.</p>
+<p>However, if ntdll.dll itself has also been hooked, attempting to use ntdll.dll to perform an indirect syscall will still be visible to the EDR.</p>
+<p><strong>ref</strong>: <a target="_blank" rel="noopener" href="https://0xdarkvortex.dev/hiding-in-plainsight/">https://0xdarkvortex.dev/hiding-in-plainsight/</a></p>
+<p><img src="/en/../img/2025-07-02/indirect_syscall.png" srcset="/en/img/loading.gif" lazyload alt="indirect_syscall.png"></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++">https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++</a></p>
+<p><a target="_blank" rel="noopener" href="https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls">https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck">https://docs.redteamleaders.com/offensive-security/defense-evasion/hookchain-technique-introduction-by-helvio-junior-m4v3r1ck</a></p>
+<blockquote>
+<p><em>Translated by AI.</em></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/en/categories/cluster/" class="category-chain-item">cluster</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/en/tags/security/">#security</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>What is DLL hooking</div>
+      <div>https://blog.nekowu.net/en/2025/07/02/2025-07-02-DLL_unhook/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>July 2, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/en/2022/10/13/2022-10-03-SEKAI-CTF-2022/" title="SEKAI CTF 2022 writeup">
+                        <span class="hidden-mobile">SEKAI CTF 2022 writeup</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/en/js/events.js" ></script>
+<script  src="/en/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/en/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/en/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/en/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/en/js/hexo_resize_image.js"></script>
+  <script>
+    (() => {
+      const button = document.getElementById('language-toggle-btn');
+      if (!button) return;
+      button.addEventListener('click', () => {
+        const path = window.location.pathname;
+        const target = path === '/en' || path === '/en/'
+          ? '/'
+          : path.startsWith('/en/')
+            ? path.slice(3)
+            : '/en' + path;
+        window.location.assign(target + window.location.search + window.location.hash);
+      });
+    })();
+  </script>
+<!-- hexo injector body_end end --></body>
+</html>

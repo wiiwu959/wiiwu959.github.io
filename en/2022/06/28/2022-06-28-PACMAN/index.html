@@ -1,0 +1,963 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/en/img/favicon.png">
+  <link rel="icon" href="/en/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="paper: https:&#x2F;&#x2F;pacmanattack.com&#x2F;paper.pdf  AbstractThis paper proposes a new attack called PACMAN. It combines memory corruption vulnerabilities with speculative execution vulnerabilities, using side">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PACMAN: Attacking ARM Pointer Authentication with Speculative Execution">
+<meta property="og:url" content="https://blog.nekowu.net/en/2022/06/28/2022-06-28-PACMAN/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="paper: https:&#x2F;&#x2F;pacmanattack.com&#x2F;paper.pdf  AbstractThis paper proposes a new attack called PACMAN. It combines memory corruption vulnerabilities with speculative execution vulnerabilities, using side">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/1ME9fSO.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/b1DqMo7.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/ggHiYGL.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/X67JkSK.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/s62UYtI.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/uSi0SoO.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/jxtNlZS.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/9qEmBjx.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/kht8qCB.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/TrUiXAy.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/3PrxiYJ.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/jnGA7tw.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-06-28/ryxncvG.png">
+<meta property="og:image" content="https://i.imgur.com/NgeVvd3.png?500x">
+<meta property="article:published_time" content="2022-06-28T14:30:42.000Z">
+<meta property="article:modified_time" content="2026-09-28T09:43:29.277Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="paper">
+<meta property="article:tag" content="security">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.nekowu.net/img/2022-06-28/1ME9fSO.png">
+  
+  
+  
+  <title>PACMAN: Attacking ARM Pointer Authentication with Speculative Execution - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="/en/css/iconfont-core.css">
+
+
+
+<link rel="stylesheet" href="/en/css/iconfont-social.css">
+
+
+<link  rel="stylesheet" href="/en/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/en/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/en/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.nekowu.net","root":"/en/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/en/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/en/js/utils.js" ></script>
+  <script  src="/en/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/en/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" rel="noopener" href="https://nekowu.net">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="language-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Language">中文</a></li><li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/en/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="PACMAN: Attacking ARM Pointer Authentication with Speculative Execution"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-06-28 15:30" pubdate>
+          June 28, 2022 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          15k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          123 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">PACMAN: Attacking ARM Pointer Authentication with Speculative Execution</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>paper: <a target="_blank" rel="noopener" href="https://pacmanattack.com/paper.pdf">https://pacmanattack.com/paper.pdf</a></p>
+</blockquote>
+<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><p>This paper proposes a new attack called PACMAN. It combines memory corruption vulnerabilities with speculative execution vulnerabilities, using side channels to speculatively leak the result of PAC verification without causing a crash. The attack was successfully demonstrated on the Apple M1 SoC, the first personal-computer processor to support ARM Pointer Authentication.</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>PACMAN is primarily a hardware-related attack. Previous vulnerabilities such as Meltdown and Spectre were also hardware-related. PACMAN mainly targets the speculative execution feature to bypass ARM pointer authentication.</p>
+<h3 id="ARM-Pointer-Authentication"><a href="#ARM-Pointer-Authentication" class="headerlink" title="ARM Pointer Authentication"></a>ARM Pointer Authentication</h3><p>When carrying out memory-related attacks, attackers often need to control data pointers and then control the execution flow. ARM therefore provides Pointer Authentication (PA) to protect pointers from being modified. This protection makes it difficult to tamper with a pointer without being detected.</p>
+<p>In general, the actual address space on a 64-bit architecture is smaller than 64 bits, so the unused bits can be used to store a hash value—a Pointer Authentication Code (PAC)—to protect the pointer. If the PAC is incorrect when the pointer is used, the program crashes.</p>
+<p>A PAC can be as small as 11 bits or as large as 31 bits, depending on the system configuration. However, even a small PAC is not easy to brute-force, because after a crash and restart, a new secret key is used, and crashing too frequently is also easy to detect.</p>
+<h3 id="Key-Challenge"><a href="#Key-Challenge" class="headerlink" title="Key Challenge"></a>Key Challenge</h3><p>The research challenges on Apple platforms were:</p>
+<ul>
+<li>Very little public documentation exists about their microarchitecture.</li>
+<li>By default, high-resolution timers are not exposed to userspace.<ul>
+<li>(Such timers are said to be very important for microarchitectural reverse engineering.)</li>
+</ul>
+</li>
+</ul>
+<h3 id="Contributions"><a href="#Contributions" class="headerlink" title="Contributions"></a>Contributions</h3><ul>
+<li>Propose the PACMAN attack.</li>
+<li>Develop microarchitectural timing side-channel attack primitives and a reverse-engineering tool for Apple M1 processors.</li>
+<li>Reverse-engineer the TLB organization and perform the first TLB-based side-channel attack using speculative execution on Apple M1 processors.</li>
+<li>Show that the PACMAN attack works across privilege levels. (We demonstrate several proof-of-concept PACMAN attacks, including constructing PAC oracles, brute-forcing PACs, and a control-flow hijacking attack targeting a PA-enabled kernel module.)</li>
+</ul>
+<h3 id="Impact"><a href="#Impact" class="headerlink" title="Impact"></a>Impact</h3><ul>
+<li>Industry: It can affect all ARM processors that use existing PAC designs.</li>
+<li>Academia: Many papers and assumptions based on memory-safety premises can be invalidated, making it necessary to modify and reevaluate the threat model.</li>
+<li>Highlights that security mechanisms employing a security-by-crash design principle and relying on a low collision probability are potentially vulnerable to speculative execution attacks.</li>
+<li>Speculation can serve as a primitive for suppressing crashes.</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="Memory-Corruption-Vulnerabilities"><a href="#Memory-Corruption-Vulnerabilities" class="headerlink" title="Memory Corruption Vulnerabilities"></a>Memory Corruption Vulnerabilities</h3><p>These vulnerabilities occur in software written in low-level languages, including:</p>
+<ul>
+<li>out-of-bound writes</li>
+<li>out-of-bound reads</li>
+<li>use-after-free</li>
+<li>double-free bugs</li>
+<li>integer overflows and underflows</li>
+<li>size confusion attacks</li>
+<li>type confusion attacks</li>
+</ul>
+<p>They can modify or destroy data and code pointers in memory. Modifying a code pointer can change the program’s execution flow and cause serious consequences. This is also known as a control-flow hijacking attack; ROP and JOP are examples.</p>
+<p>Common protections include:</p>
+<ul>
+<li>stack canaries</li>
+<li>data execution prevention</li>
+<li>ASLR</li>
+<li>kASLR (kernel ASLR)</li>
+</ul>
+<p>Although these protections increase the difficulty of attacks, they can still potentially be bypassed.</p>
+<h3 id="ARM-Pointer-Authentication-1"><a href="#ARM-Pointer-Authentication-1" class="headerlink" title="ARM Pointer Authentication"></a>ARM Pointer Authentication</h3><p>ARMv8.3 introduced PA as a low-overhead protection mechanism to prevent pointers from being modified. It primarily protects pointers by signing them with a hash, called a Pointer Authentication Code (PAC). The PAC is checked before the pointer is used.</p>
+<h4 id="Signing-and-Verifying-Pointers"><a href="#Signing-and-Verifying-Pointers" class="headerlink" title="Signing and Verifying Pointers"></a>Signing and Verifying Pointers</h4><p>In practice, a 64-bit architecture does not use the entire 64-bit address space. PA stores the PAC in the unused bits.<br><img src="/en/../img/2022-06-28/1ME9fSO.png" srcset="/en/img/loading.gif" lazyload><br>The context value used to generate the hash shown in the figure contains a key in a register accessible only at a higher privilege level, as well as a program-specified salt.</p>
+<h4 id="ISA-Extension"><a href="#ISA-Extension" class="headerlink" title="ISA Extension"></a>ISA Extension</h4><p><img src="/en/../img/2022-06-28/b1DqMo7.png" srcset="/en/img/loading.gif" lazyload><br>To provide PA functionality, PA provides two groups of instruction sets for these operations:</p>
+<ul>
+<li>Instructions beginning with <code>pac</code> perform signing.<ul>
+<li>The hardware can keep up to five keys recorded simultaneously. The key used for a particular signing operation is determined by the opcode.</li>
+<li>e.g. <code>pacia ptr, salt</code></li>
+</ul>
+</li>
+<li>Instructions beginning with <code>aut</code> perform verification.</li>
+</ul>
+<p>On Apple chips, in addition to protecting return addresses, PAC is also used to protect many other data structures, including C++ vtable pointers, vtable entries, and Objective-C method caches.</p>
+<h3 id="Microarchitectural-Side-Channels"><a href="#Microarchitectural-Side-Channels" class="headerlink" title="Microarchitectural Side Channels"></a>Microarchitectural Side Channels</h3><p>Shared microarchitectural structures, including caches, TLBs, functional units, and networks-on-chip, can be used to leak sensitive information.</p>
+<h4 id="Prime-Probe"><a href="#Prime-Probe" class="headerlink" title="Prime+Probe"></a>Prime+Probe</h4><ul>
+<li>Has relatively few restrictions.</li>
+<li>The attacker first fills the cache. After the victim accesses it, the attacker accesses the entire cache again and uses timing differences to determine which parts the victim accessed.</li>
+</ul>
+<h4 id="Flush-Reload"><a href="#Flush-Reload" class="headerlink" title="Flush+Reload"></a>Flush+Reload</h4><ul>
+<li>Requires shared memory.</li>
+<li>The attacker first flushes the memory locations to be observed. After the victim finishes executing, the attacker scans the memory again and uses timing differences to determine which locations were accessed.</li>
+<li>Used by both Meltdown and Spectre.</li>
+</ul>
+<h4 id="Evict-Reload"><a href="#Evict-Reload" class="headerlink" title="Evict+Reload"></a>Evict+Reload</h4><ul>
+<li>Requires shared memory.</li>
+<li>Similar to Prime+Probe, but operates on shared memory.</li>
+</ul>
+<h3 id="Speculative-Execution-Attacks"><a href="#Speculative-Execution-Attacks" class="headerlink" title="Speculative Execution Attacks"></a>Speculative Execution Attacks</h3><p>Speculative execution is a processor optimization. Because processors operate very quickly, they execute ahead in order to make better use of their resources. For example, with branch prediction, the processor guesses which path a branch will take before the branch condition is determined and begins executing that path. If the prediction is correct, execution can continue directly; if it is incorrect, the processor returns to the branch point and takes the correct path. However, this optimization has also introduced several vulnerabilities.</p>
+<h4 id="Meltdown"><a href="#Meltdown" class="headerlink" title="Meltdown"></a>Meltdown</h4><p>Meltdown exploits exceptions and speculative execution. Before execution stops due to an exception, the processor speculatively runs ahead to instructions that load sensitive information and then stops.</p>
+<h4 id="Spectre"><a href="#Spectre" class="headerlink" title="Spectre"></a>Spectre</h4><p>Spectre targets conditional branches or indirect branches.</p>
+<h2 id="Threat-Model"><a href="#Threat-Model" class="headerlink" title="Threat Model"></a>Threat Model</h2><ul>
+<li>Target<ul>
+<li>Use a PAC oracle on a PA-enabled victim to recover the PAC and achieve a control-flow hijacking attack.</li>
+</ul>
+</li>
+<li>Attacker<ul>
+<li>An unprivileged userspace application.</li>
+</ul>
+</li>
+<li>Victim<ul>
+<li>The operating system kernel.</li>
+</ul>
+</li>
+<li>Assumptions<ol>
+<li>The victim program contains an exploitable memory corruption vulnerability that allows the attacker to write arbitrary data to memory.</li>
+<li>PA is enabled and PACMAN gadgets exist.</li>
+<li>A side-channel attack can be performed (that is, a high-resolution timer is available).</li>
+</ol>
+</li>
+</ul>
+<h2 id="The-PACMAN-Attack"><a href="#The-PACMAN-Attack" class="headerlink" title="The PACMAN Attack"></a>The PACMAN Attack</h2><p>The main idea is to use speculative execution attacks and microarchitectural side channels to leak the result of PAC verification without causing a crash.</p>
+<h3 id="PACMAN-gadgets"><a href="#PACMAN-gadgets" class="headerlink" title="PACMAN gadgets"></a>PACMAN gadgets</h3><p>Some exploitable code patterns are referred to as PACMAN gadgets. They consist of two operations:</p>
+<ul>
+<li>verification<br>  Verifies the PAC. Given a pointer, it checks whether the PAC is correct. If it is correct, it outputs a valid pointer; if it is incorrect, it outputs an invalid pointer, which causes an execution error, as described in the Background section.</li>
+<li>transmission<br>  Speculatively executes the verified output pointer. This may involve a load or store—in other words, the pointer is speculatively translated into a physical address and used. If execution succeeds, it produces an observable side effect that can be monitored through a side channel to leak relevant information. If speculative execution fails, it produces a speculative exception. Because these events occur under a mis-speculated branch, they do not cause a crash.</li>
+</ul>
+<p>PACMAN gadgets are further divided into the following two types:<br><img src="/en/../img/2022-06-28/ggHiYGL.png" srcset="/en/img/loading.gif" lazyload></p>
+<ul>
+<li>Data PACMAN Gadget (Figure 3c)<ul>
+<li>Caused by speculatively predicting a branch and performing data accesses.</li>
+<li>AUT: pointer authentication instruction.</li>
+<li>guessed_ptr: pointer provided by the attacker.</li>
+<li>verified_ptr: output pointer from AUT.</li>
+<li>Whether the pointer is correct can be determined by observing the difference between a load being executed and an exception occurring.</li>
+</ul>
+</li>
+<li>Instruction PACMAN Gadget (Figure 3d)<ul>
+<li>Caused by speculatively predicting a branch and performing instruction fetches.</li>
+<li>Before AUT completes, the branch target buffer (BTB) predicts BR2. (This is common in nested-branch prediction.)</li>
+<li>After AUT completes and determines that the BR2 prediction was incorrect, it eagerly squashes BR2.</li>
+<li>It fetches the correct BR2, which is the result of AUT.</li>
+<li>Limitations:<ul>
+<li>The processor must support eager squashing of nested branches. There must be a third step that squashes the pointer after AUT; only then will the pointer be used and the result of AUT can be leaked.</li>
+<li>It must be possible to distinguish the side effects of fetching the verified pointer from those of the BTB prediction. In the TLB-based side channel used by this proof of concept, the BTB prediction and the verified pointer must be on different pages.<br>  <img src="/en/../img/2022-06-28/X67JkSK.png" srcset="/en/img/loading.gif" lazyload></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Gadget-Detection"><a href="#Gadget-Detection" class="headerlink" title="Gadget Detection"></a>Gadget Detection</h3><p>Using Ghidra’s scripting API, conditional branches in the kernel are located and the following 32 instructions are inspected. If the verified pointer is used in a transmit instruction—a memory access or a branch instruction—it is considered a PACMAN gadget.</p>
+<p>In xnu-8019.80.24, 13,867 data PACMAN gadgets and 41,292 instruction PACMAN gadgets were found. Because only the following 32 instructions were searched, there may be even more gadgets if a larger range is examined.</p>
+<h3 id="An-End-to-End-Illustrative-Example"><a href="#An-End-to-End-Illustrative-Example" class="headerlink" title="An End-to-End Illustrative Example"></a>An End-to-End Illustrative Example</h3><p><img src="/en/../img/2022-06-28/s62UYtI.png" srcset="/en/img/loading.gif" lazyload><br>Suppose there is a BoF that can overwrite a function pointer.</p>
+<ol>
+<li>Execute the program normally and train the BTB and branch predictor (<code>cond = true</code>).</li>
+<li>Use the BoF to modify <code>fp</code>, then guess the PAC until it is correct (<code>cond = false</code>; the branch is not actually taken, but is speculatively executed, so no crash occurs).</li>
+<li>Finally, use the guessed PAC to complete the exploit (<code>con = true</code>).</li>
+</ol>
+<h2 id="Attack-Platform"><a href="#Attack-Platform" class="headerlink" title="Attack Platform"></a>Attack Platform</h2><ul>
+<li>Apple M1 SoC<ul>
+<li>The first desktop aarch64 platform supporting ARMv8.3 extensions, including PA.</li>
+<li>EL0: the execution level for usermode programs.</li>
+<li>EL1: the execution level for the kernel.</li>
+</ul>
+</li>
+<li>macOS and the XNU Kernel<ul>
+<li>OS: macOS</li>
+<li>XNU Kernel<ul>
+<li>Has loadable kernel extensions, or kexts.</li>
+<li>Used later during reverse engineering.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>None of the above is open source, and there is little documentation, so reverse engineering is needed to obtain the required information. This is also one of the paper’s major contributions.</p>
+<h2 id="Reverse-Engineering-Tools"><a href="#Reverse-Engineering-Tools" class="headerlink" title="Reverse Engineering Tools"></a>Reverse Engineering Tools</h2><h3 id="High-Resolution-Timers"><a href="#High-Resolution-Timers" class="headerlink" title="High-Resolution Timers"></a>High-Resolution Timers</h3><p>As mentioned earlier, side-channel attacks such as Prime+Probe require precise timing, so the researchers identified which timers in the M1 could be used.<br><img src="/en/../img/2022-06-28/uSi0SoO.png" srcset="/en/img/loading.gif" lazyload></p>
+<ul>
+<li>CNTPCT_EL0<ul>
+<li>System Counter. All cores share this counter, but its frequency of 24 MHz is too low to precisely observe differences such as cache hits and misses.</li>
+</ul>
+</li>
+<li>PMCCNTR_EL0<ul>
+<li>ARM Cycle Count Register. Most ARM Cortex processors have performance monitoring units (PMUs) and therefore provide this counter, but the M1’s PMU is not a standard PMU, so it does not provide it.</li>
+</ul>
+</li>
+<li>PMC0<ul>
+<li>This counter is not mentioned in the documentation and counts cycles. There is also a PMC1 that counts instructions, but neither is accessible from userspace.</li>
+<li>To use it, the researchers used the previously mentioned kext to modify a control register, PMCR0, so that PMC0 could be accessed from userspace. (This was only for reverse engineering and was not used in the attack.)</li>
+</ul>
+</li>
+<li>Custom Multi-thread Timer<ul>
+<li>The researchers implemented a userspace-accessible timer that does not require a kext, as follows:<br>  <img src="/en/../img/2022-06-28/jxtNlZS.png" srcset="/en/img/loading.gif" lazyload></li>
+<li><code>isb</code> is used for control flow, but they later found that omitting it slightly increased variation while providing greater timing precision, so they ultimately removed it.</li>
+</ul>
+</li>
+</ul>
+<h3 id="PacmanOS"><a href="#PacmanOS" class="headerlink" title="PacmanOS"></a>PacmanOS</h3><p>Written in Rust, this is a bare-metal environment that can run on the M1. It gives the researchers complete control over the environment, including the hardware and other sources of interference, making experiments easier to conduct.</p>
+<h2 id="Reverse-Engineering"><a href="#Reverse-Engineering" class="headerlink" title="Reverse Engineering"></a>Reverse Engineering</h2><h3 id="Basic-Memory-Hierarchy-Information"><a href="#Basic-Memory-Hierarchy-Information" class="headerlink" title="Basic Memory Hierarchy Information"></a>Basic Memory Hierarchy Information</h3><p><img src="/en/../img/2022-06-28/9qEmBjx.png" srcset="/en/img/loading.gif" lazyload></p>
+<p>The M1 uses a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ARM_big.LITTLE">big.LITTLE</a> design.</p>
+<blockquote>
+<p>big.LITTLE: A combination proposed by ARM that combines more powerful big cores with weaker but more power-efficient little cores. Here, the terms p-core (Performance) and e-core (Efficient) are used for big and little, respectively, although these are Intel’s naming conventions.</p>
+</blockquote>
+<p>The M1 memory system has two levels of cache, with different sizes on different cores. The kernel uses 48-bit virtual addresses and a 16-bit PAC.</p>
+<h3 id="L1-Data-TLB-and-L2-TLB"><a href="#L1-Data-TLB-and-L2-TLB" class="headerlink" title="L1 Data TLB and L2 TLB"></a>L1 Data TLB and L2 TLB</h3><p>The researchers mainly studied p-core behavior because speculative behavior on p-cores is more reliable. Unlike Linux, which provides an API (<code>taskset</code>) to directly specify which core should execute a task, they used <code>pthread_set_qos_class_self_np</code> to “suggest” to the kernel which core to use. The counter they used was <code>PMC0</code>, which requires a kext.</p>
+<p>The experiment used Prime+Probe to measure the TLB size. The main steps were:</p>
+<ol>
+<li>Load a particular address.</li>
+<li>Load N addresses to fill the TLB.</li>
+<li>Load the address from step 1 again and measure the latency.</li>
+</ol>
+<p><img src="/en/../img/2022-06-28/kht8qCB.png" srcset="/en/img/loading.gif" lazyload></p>
+<p>The result was Figure (a). Each gap represents the boundary of a TLB size (L1 dTLB&#x2F;L2 TLB). Although this cannot conclusively prove that the cache organization is exactly as inferred, it does reveal how to fill the TLB.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs !">1) To evict a page table entry from the L1 dTLB, we can create an eviction set with 12 or more addresses with a stride of 256×16KB.<br>2) To evict a page table entry from the L2 TLB, we can create an eviction set with 23 or more addresses with a stride of 2048×16KB.<br></code></pre></td></tr></table></figure>
+
+<p>TLB conflicts and cache conflicts were measured using different methods for calculating the addresses of the N loaded addresses, producing Figure (b) (L1 cache&#x2F;L2 cache&#x2F;L1 dTLB&#x2F;L2 TLB).</p>
+<h3 id="L1-Instruction-TLB"><a href="#L1-Instruction-TLB" class="headerlink" title="L1 Instruction TLB"></a>L1 Instruction TLB</h3><ol>
+<li>Fill both the L1 dTLB and the L2 TLB.</li>
+<li>Branch to a particular address.</li>
+<li>Execute N branches to fill the iTLB (called the instruction eviction set).</li>
+<li>Load the address from step 2 and measure the latency. (The reason for using a “load” to obtain data-access latency is explained below.)</li>
+</ol>
+<p>The result was Figure (c). Before explaining the result, the inferred overall TLB organization is described below.</p>
+<p><img src="/en/../img/2022-06-28/TrUiXAy.png" srcset="/en/img/loading.gif" lazyload></p>
+<ul>
+<li>The user and kernel L1 iTLBs are not shared, so userspace cannot observe differences in kernel space.</li>
+<li>The L1 dTLB is a non-inclusive backing store for the L1 iTLB. When the iTLB is filled, entries are also placed in the dTLB. This is why step 4 above uses a “load” to measure data-access latency.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs !">3) To evict a page table entry from the L1 iTLB, we can create an eviction set with 4 or more branch instructions with a stride of 32×16KB.<br></code></pre></td></tr></table></figure>
+
+<h3 id="Summary-of-Reverse-Engineering-Results"><a href="#Summary-of-Reverse-Engineering-Results" class="headerlink" title="Summary of Reverse Engineering Results"></a>Summary of Reverse Engineering Results</h3><ul>
+<li>After filling the iTLB, the dTLB can also be filled.</li>
+</ul>
+<p><img src="/en/../img/2022-06-28/3PrxiYJ.png" srcset="/en/img/loading.gif" lazyload></p>
+<ul>
+<li>Both PMC0 and the Multi-thread Counter can clearly distinguish between TLB hits and misses, as well as cache hits and misses.</li>
+</ul>
+<h2 id="Proof-of-Concept-Attacks"><a href="#Proof-of-Concept-Attacks" class="headerlink" title="Proof-of-Concept Attacks"></a>Proof-of-Concept Attacks</h2><h3 id="PAC-Oracles"><a href="#PAC-Oracles" class="headerlink" title="PAC Oracles"></a>PAC Oracles</h3><p>In the experiment, the researchers installed a kext containing a syscall that could trigger a PACMAN gadget. They then tested a large number of pointers with correct PACs and pointers without PACs, measuring the timing with the counter they defined. They used both data accesses and instruction fetches to leak whether the PAC was correct.<br><img src="/en/../img/2022-06-28/jnGA7tw.png" srcset="/en/img/loading.gif" lazyload></p>
+<ul>
+<li>Leaking via Data Accesses<ul>
+<li>Because the dTLB is shared between userspace and the kernel, it can be measured directly.</li>
+</ul>
+<ol>
+<li>Train the PACMAN gadget’s branch predictor (64 times).</li>
+<li>Reset the TLB.</li>
+<li>Prime the L1 dTLB.</li>
+<li>Trigger the PACMAN gadget by passing in the pointer containing the PAC to be tested.</li>
+<li>Probe the L1 dTLB set by re-accessing the eviction set and report the number of L1 dTLB misses.</li>
+</ol>
+</li>
+<li>Leaking via Instruction Fetches<ul>
+<li>The kernelspace and userspace L1 iTLBs are not shared. Therefore, userspace triggers self-conflicts in kernelspace and fills its iTLB, thereby filling the shared dTLB.</li>
+<li>The preceding steps are the same as for data accesses.</li>
+</ul>
+<ol start="5">
+<li>Use the set that filled the iTLB to attempt to fill it again.</li>
+<li>Finally, check whether it was also placed in the dTLB to determine whether a miss occurred.</li>
+</ol>
+</li>
+</ul>
+<h3 id="Brute-Force-Attack"><a href="#Brute-Force-Attack" class="headerlink" title="Brute-Force Attack"></a>Brute-Force Attack</h3><ul>
+<li>Attack Speed<ul>
+<li>The M1 uses a 16-bit PAC.</li>
+<li>It takes 2.94 minutes on average to try all possible PAC values.</li>
+<li>The main time cost is the syscall used to train the predictor. This could be shortened, but it is not necessary.</li>
+</ul>
+</li>
+<li>Attack Accuracy<ul>
+<li>Noisy environment.</li>
+<li>90% correct PAC (45).</li>
+<li>10% no PAC value was found (5).</li>
+<li>No false positives (incorrect PACs).</li>
+</ul>
+</li>
+</ul>
+<h3 id="Jump2Win-Attack"><a href="#Jump2Win-Attack" class="headerlink" title="Jump2Win Attack"></a>Jump2Win Attack</h3><p>Once the PAC is available, the vulnerability can be exploited directly.<br><img src="/en/../img/2022-06-28/ryxncvG.png" srcset="/en/img/loading.gif" lazyload><br><img src="https://i.imgur.com/NgeVvd3.png?500x" srcset="/en/img/loading.gif" lazyload></p>
+<h2 id="Countermeasures"><a href="#Countermeasures" class="headerlink" title="Countermeasures"></a>Countermeasures</h2><ul>
+<li>Explore PAC-agnostic execution.<ul>
+<li>Modify the architecture or software to ensure that PACs are not verified and used during speculation.</li>
+<li>Pause speculative execution when a memory access or branch requires a verified pointer.<ul>
+<li><code>fence</code>&#x2F;<code>isb</code></li>
+<li>This reduces performance.</li>
+</ul>
+</li>
+<li>Always assume that the PAC will pass during speculative execution.<ul>
+<li>Speculatively executing with invalid pointers may cause a Meltdown-style vulnerability.</li>
+<li>This must be combined with Meltdown mitigations.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Improve Spectre defenses.<ul>
+<li>Make speculative loads unobservable.<ul>
+<li>Invisible speculation mechanisms.</li>
+<li>Such as InvisiSpec, SafeSpec, and Delay-on-Miss.</li>
+</ul>
+</li>
+<li>Use information-flow tracking to prevent secrets accessed speculatively from being leaked.<ul>
+<li>STT, NDA, and Dolma.</li>
+<li>Taint pointer authentication instructions.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Do not write programs containing memory corruption vulnerabilities.</li>
+</ul>
+<blockquote>
+<p><em>Translated by AI.</em></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/en/categories/paper/" class="category-chain-item">paper</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/en/tags/paper/">#paper</a>
+      
+        <a href="/en/tags/security/">#security</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>PACMAN: Attacking ARM Pointer Authentication with Speculative Execution</div>
+      <div>https://blog.nekowu.net/en/2022/06/28/2022-06-28-PACMAN/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>June 28, 2022</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/en/2022/10/13/2022-10-03-SEKAI-CTF-2022/" title="SEKAI CTF 2022 writeup">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEKAI CTF 2022 writeup</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/en/2022/03/08/2022-03-07-CVE-2021-3129/" title="CVE-2021-3129 Laravel debug mode: Remote code execution">
+                        <span class="hidden-mobile">CVE-2021-3129 Laravel debug mode: Remote code execution</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/en/js/events.js" ></script>
+<script  src="/en/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/en/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/en/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/en/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/en/js/hexo_resize_image.js"></script>
+  <script>
+    (() => {
+      const button = document.getElementById('language-toggle-btn');
+      if (!button) return;
+      button.addEventListener('click', () => {
+        const path = window.location.pathname;
+        const target = path === '/en' || path === '/en/'
+          ? '/'
+          : path.startsWith('/en/')
+            ? path.slice(3)
+            : '/en' + path;
+        window.location.assign(target + window.location.search + window.location.hash);
+      });
+    })();
+  </script>
+<!-- hexo injector body_end end --></body>
+</html>

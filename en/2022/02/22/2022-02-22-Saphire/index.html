@@ -1,0 +1,832 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/en/img/favicon.png">
+  <link rel="icon" href="/en/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Wii Wu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="paper: https:&#x2F;&#x2F;www.usenix.org&#x2F;system&#x2F;files&#x2F;sec21-bulekov.pdf  Abstract PHP and Python are interpreted languages. Applications written in these languages often run with the same excessive privileges,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Saphire: Sandboxing PHP Applications with Tailored System Call Allowlists">
+<meta property="og:url" content="https://blog.nekowu.net/en/2022/02/22/2022-02-22-Saphire/index.html">
+<meta property="og:site_name" content="Wii&#39;s Blog">
+<meta property="og:description" content="paper: https:&#x2F;&#x2F;www.usenix.org&#x2F;system&#x2F;files&#x2F;sec21-bulekov.pdf  Abstract PHP and Python are interpreted languages. Applications written in these languages often run with the same excessive privileges,">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/d7kG04y.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/z7f9M0A.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/CIULMjv.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/gzLlySS.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/WwM9SjR.png=300x.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/8R8AxXz.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/1LBgDRI.png">
+<meta property="og:image" content="https://blog.nekowu.net/img/2022-02-22/nhoqfJO.png">
+<meta property="article:published_time" content="2022-02-22T17:03:19.000Z">
+<meta property="article:modified_time" content="2026-09-28T09:39:14.646Z">
+<meta property="article:author" content="Wii Wu">
+<meta property="article:tag" content="paper">
+<meta property="article:tag" content="security">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.nekowu.net/img/2022-02-22/d7kG04y.png">
+  
+  
+  
+  <title>Saphire: Sandboxing PHP Applications with Tailored System Call Allowlists - Wii&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="/en/css/iconfont-core.css">
+
+
+
+<link rel="stylesheet" href="/en/css/iconfont-social.css">
+
+
+<link  rel="stylesheet" href="/en/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/en/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/en/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"blog.nekowu.net","root":"/en/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/en/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/en/js/utils.js" ></script>
+  <script  src="/en/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/en/">
+      <strong>wiiwu&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/en/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" target="_blank" rel="noopener" href="https://nekowu.net">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="language-toggle-btn"><a class="nav-link" target="_self" href="javascript:;" aria-label="Language">中文</a></li><li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/en/img/default.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Saphire: Sandboxing PHP Applications with Tailored System Call Allowlists"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-02-22 17:03" pubdate>
+          February 22, 2022 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          67 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Saphire: Sandboxing PHP Applications with Tailored System Call Allowlists</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>paper: <a target="_blank" rel="noopener" href="https://www.usenix.org/system/files/sec21-bulekov.pdf">https://www.usenix.org/system/files/sec21-bulekov.pdf</a></p>
+</blockquote>
+<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><ul>
+<li>PHP and Python are interpreted languages. Applications written in these languages often run with the same excessive privileges, violating the Principle of Least Privilege (PoLP)—that is, the principle that fewer privileges are better. This exposes the entire system to danger: once an RCE occurs, it is easy for an attacker to obtain overly high privileges and expose the system to even greater risks.</li>
+<li>This paper aims to implement PoLP by properly controlling privileges, using the authors’ proposed method of automatically generating a syscall policy for each individual program.</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><ul>
+<li>RCE</li>
+<li>seccomp<ul>
+<li>Specifies that a process may call only particular system calls</li>
+</ul>
+</li>
+<li>ptrace<ul>
+<li>Allows a tracing process to observe or control the contents (such as memory or registers) or execution flow of another traced process</li>
+<li>Primarily used to implement debuggers or trace syscalls</li>
+</ul>
+</li>
+</ul>
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><h3 id="Interpreters"><a href="#Interpreters" class="headerlink" title="Interpreters"></a>Interpreters</h3><ul>
+<li>Interpreted program: a program that requires an interpreter to execute</li>
+<li>An interpreter can be directly executed by the OS and hardware</li>
+</ul>
+<p>Therefore, interpreted programs are portable. An interpreted program typically provides users with an API composed of several functions, and only these APIs can access syscalls. Even when JIT is used, syscalls can still be called only through the API.</p>
+<h4 id="An-API-for-all-interpreted-programs"><a href="#An-API-for-all-interpreted-programs" class="headerlink" title="An API for all interpreted programs"></a>An API for all interpreted programs</h4><p>Because these APIs generally need to be highly general-purpose, they usually use many syscalls at once, so simply filtering syscalls is not meaningful. However, a program may use only a small subset of syscalls, in which case filtering can be useful.<br><img src="/en/../img/2022-02-22/d7kG04y.png" srcset="/en/img/loading.gif" lazyload><br>For example, Prog1 does not need syscall1, so it can be filtered out.</p>
+<h3 id="Securing-Interpreted-Programs"><a href="#Securing-Interpreted-Programs" class="headerlink" title="Securing Interpreted Programs"></a>Securing Interpreted Programs</h3><ul>
+<li>Mapping the interpreter API to syscalls<br>  Use static and dynamic analysis to map API function handlers to syscalls</li>
+<li>Identifying API calls within an interpreted program<br>  Identify the functions used in each piece of code, including all dependencies (both implicit and explicit), and then use the preceding mapping results to generate an allowed list</li>
+<li>Protecting the Program<br>  Apply the allowed list to the program</li>
+</ul>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>The steps mentioned above are implemented and explained using PHP here.<br><img src="/en/../img/2022-02-22/z7f9M0A.png" srcset="/en/img/loading.gif" lazyload></p>
+<h3 id="Mapping-built-in-PHP-functions-to-system-calls"><a href="#Mapping-built-in-PHP-functions-to-system-calls" class="headerlink" title="Mapping built-in PHP functions to system-calls"></a>Mapping built-in PHP functions to system-calls</h3><p>Map PHP functions to the system calls they use.</p>
+<ul>
+<li>First, use static call-graph analysis to perform an initial mapping.</li>
+<li>Then, use ptrace to observe the syscalls used while running the PHP process.</li>
+</ul>
+<h4 id="Static-analysis-over-the-PHP-Interpreter"><a href="#Static-analysis-over-the-PHP-Interpreter" class="headerlink" title="Static analysis over the PHP Interpreter"></a>Static analysis over the PHP Interpreter</h4><ul>
+<li>Use symbols to construct the static call graph of the entire interpreter and libraries (each node is a function, and each edge is a direct function call).</li>
+<li>To find all handlers, use <code>get_defined_functions()</code> to locate the addresses of all built-in PHP function handlers.</li>
+</ul>
+<p>Although this step is static, it must be run across many code bases (after examining the code, the paper also states that this takes more than 30 minutes).</p>
+<h4 id="Refining-the-mapping-through-dynamic-analysis"><a href="#Refining-the-mapping-through-dynamic-analysis" class="headerlink" title="Refining the mapping through dynamic analysis"></a>Refining the mapping through dynamic analysis</h4><p>Although the previous step exhaustively scanned the code in the entire PHP process, it misses indirect calls. For example, PHP’s <code>fopen</code> can access remote files, and some functions such as <code>mail()</code> execute the <code>sendmail</code> binary. Purely static analysis cannot map the syscalls invoked by <code>sendmail</code>.</p>
+<ul>
+<li>TE finds the name of the PHP function currently running in shared memory.</li>
+<li>TR uses ptrace to intercept syscalls.</li>
+</ul>
+<p>Combining these two makes it possible to dynamically map this kind of function.</p>
+<h3 id="Creating-system-call-filters-for-web-apps"><a href="#Creating-system-call-filters-for-web-apps" class="headerlink" title="Creating system-call filters for web apps"></a>Creating system-call filters for web apps</h3><p>The purpose of this step is to identify which PHP built-in functions the interpreter will invoke, and then compare them with the mapping table generated in the previous step to generate the system calls that each script in the web app may call.</p>
+<ul>
+<li>First, iterate through all PHP files in the web app.<ul>
+<li>Use php-parser to generate an Abstract syntax tree (AST).</li>
+<li>Scan the AST to identify possible built-in function calls.</li>
+<li>Check assignments to determine class types and thereby map the functions.</li>
+</ul>
+</li>
+<li>Identify dependencies in the AST.<ul>
+<li>constant definitions</li>
+<li>class definitions&#x2F;instantiations</li>
+<li>include&#x2F;require operations</li>
+</ul>
+</li>
+</ul>
+<p>The most labor-intensive part is handling dependencies. Simple includes can be handled easily, but if variables or constants are used, additional processing is required.</p>
+<h4 id="String-representation"><a href="#String-representation" class="headerlink" title="String representation"></a>String representation</h4><p>Various methods are used to convert include strings of different kinds until they can no longer be processed or processing is complete.<br><img src="/en/../img/2022-02-22/CIULMjv.png" srcset="/en/img/loading.gif" lazyload><br>(If a variable is assigned multiple times, each assignment is identified; if this is not possible, all possibilities are listed.)</p>
+<h4 id="Unresolved-Includes"><a href="#Unresolved-Includes" class="headerlink" title="Unresolved Includes"></a>Unresolved Includes</h4><p>At this point, 74% of includes can be resolved. The remainder can be fuzzy resolved, meaning that a small set of contents is treated as having been included.</p>
+<p>Some includes provide no information at all through static analysis. In this case, they provide a Conservative Includes option, which uses this method. After enabling this option, the probability of FP decreases, but the contents of the allowed list become more extensive.</p>
+<h4 id="Building-system-call-profiles-for-Scripts"><a href="#Building-system-call-profiles-for-Scripts" class="headerlink" title="Building system-call profiles for Scripts"></a>Building system-call profiles for Scripts</h4><p>Finally, once we have a script, the PHP functions that it and its dependencies will call, and the mapping obtained in the previous step, we can generate a profile mapping the script to its syscalls (script path &lt;-&gt; profile).</p>
+<h3 id="Sandboxing-the-Interpreter-and-Web-App"><a href="#Sandboxing-the-Interpreter-and-Web-App" class="headerlink" title="Sandboxing the Interpreter and Web App"></a>Sandboxing the Interpreter and Web App</h3><p>This allowed list is implemented using seccomp. This SE extension determines which script the process is running when it starts and tells the kernel which syscall allowed list to use.</p>
+<p>Therefore, this SE runs twice during the lifetime of an interpreter. The first time is when the PHP process starts, when all allowed lists are loaded into memory. When a request is received, the applicable allowed list is sent to the kernel.</p>
+<p>(<code>libseccomp</code> is used to convert a sequence of syscalls into an allowlist.)</p>
+<ul>
+<li>Web requests are usually handled by a web server such as nginx or Apache, so this plugin is installed on the web server as well as in the PHP CLI API (the command-line interface).</li>
+<li>Because seccomp is used, a process can run only one script (a process cannot suddenly switch to a different allowed list).<ul>
+<li>A PHP interpreter process can be used for only one request, but this approach results in very high latency when loading is expensive.</li>
+<li>Each PHP worker can handle many requests, but the same worker can handle requests for only the same script.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h2><h3 id="Dependency-Resolution"><a href="#Dependency-Resolution" class="headerlink" title="Dependency Resolution"></a>Dependency Resolution</h3><ul>
+<li>All dependencies are divided into those that can be resolved literally and those that require dynamic resolution.</li>
+<li>Resolved avg -&gt; 74%</li>
+<li>Fuzzy resolved -&gt; 22%</li>
+<li>Class 85%</li>
+<li>For example, Joolma changes many original classes to call them using aliases, which cannot be detected in this case.<br><img src="/en/../img/2022-02-22/gzLlySS.png" srcset="/en/img/loading.gif" lazyload></li>
+</ul>
+<h3 id="Syscall-Profile-Size"><a href="#Syscall-Profile-Size" class="headerlink" title="Syscall Profile Size"></a>Syscall Profile Size</h3><ul>
+<li>To understand how many syscalls are filtered and how effective CI is, examine the size of the syscall profile. The larger the size, the more syscalls are available, so it should be kept as small as possible while still allowing the program to run.</li>
+<li>Dangerous syscalls were also evaluated in particular.<br><img src="/en/../img/2022-02-22/WwM9SjR.png=300x.png" srcset="/en/img/loading.gif" lazyload></li>
+<li>The black line represents the state when CI is not enabled.<ul>
+<li>When it is enabled, FP decreases, but the danger increases.</li>
+</ul>
+</li>
+<li>Approximately 80% of dangerous system calls are filtered.</li>
+<li>Some common functions appear in many scripts, making the profiles of many scripts very similar.</li>
+</ul>
+<h3 id="Defense-Capabilities"><a href="#Defense-Capabilities" class="headerlink" title="Defense Capabilities"></a>Defense Capabilities</h3><ul>
+<li>21 RCE exploits were selected for testing.<br><img src="/en/../img/2022-02-22/8R8AxXz.png" srcset="/en/img/loading.gif" lazyload></li>
+<li>Is too restrictive?<ul>
+<li>Calculate coverage to demonstrate that the program executes normally.</li>
+<li>After enabling CI, there is no FP at all.</li>
+<li>After disabling it:<ul>
+<li>Joomla is affected by the alias issue mentioned above.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Payload constraint?<ul>
+<li>The dangerous syscalls remaining after filtering are insufficient to construct a payload capable of ACE. They also performed many additional tests and found that the remaining syscalls lacked the components needed to assemble a payload.</li>
+</ul>
+</li>
+<li>Non-vuln plugins<ul>
+<li>Non-vulnerable plugins were also tested to evaluate FP.<br>  <img src="/en/../img/2022-02-22/1LBgDRI.png" srcset="/en/img/loading.gif" lazyload></li>
+</ul>
+</li>
+<li>Runtime Overhead<ul>
+<li>The key issue arises after implementation in the web app. Because of the seccomp issue mentioned above, the process must be restarted after each request is processed.</li>
+<li>The resulting overhead is small enough to be negligible. Even particularly trivial scripts are not affected significantly. In particular, after implementing the method whereby “the same worker can handle requests for only the same script,” the impact is even smaller.<br>  <img src="/en/../img/2022-02-22/nhoqfJO.png" srcset="/en/img/loading.gif" lazyload></li>
+</ul>
+</li>
+</ul>
+<h2 id="Limitations-and-Discussion"><a href="#Limitations-and-Discussion" class="headerlink" title="Limitations and Discussion"></a>Limitations and Discussion</h2><ul>
+<li>eval() system()<ul>
+<li>They do not handle these two functions or their arguments.</li>
+</ul>
+</li>
+<li>Mimicry<ul>
+<li>Although the results are already very good and no RCE occurred in the tests, some dangerous syscalls are still allowed and may be combined into a payload.</li>
+</ul>
+</li>
+<li>Overwriting scripts<ul>
+<li>If an attacker can modify a script and mislead the profile, this can be addressed simply by using a checksum.</li>
+</ul>
+</li>
+<li>Writing to sensitive files<ul>
+<li>To prevent attackers from gaining privileges by writing files, ptrace is also used to ensure that the interpreter cannot access certain important fds (file descriptors).</li>
+</ul>
+</li>
+<li>Installing plugins<ul>
+<li>When a new plugin is installed, a profile is immediately created for it, but this requires manual action.</li>
+</ul>
+</li>
+<li>Filter system call argument<ul>
+<li>In addition to directly filtering syscalls, filtering their arguments as well would provide greater precision.</li>
+</ul>
+</li>
+<li>Line coverage of evaluated web apps</li>
+<li>Applying Saphire to other interpreters<ul>
+<li>Python interpreter running a program composed of multiple python scripts</li>
+<li>A server executing multiple Node.JS microservices</li>
+<li>classic CGI-based interpreted web-app using a language such as Perl or Lua</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><em>Translated by AI.</em></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/en/categories/paper/" class="category-chain-item">paper</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/en/tags/paper/">#paper</a>
+      
+        <a href="/en/tags/security/">#security</a>
+      
+        <a href="/en/tags/web/">#web</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Saphire: Sandboxing PHP Applications with Tailored System Call Allowlists</div>
+      <div>https://blog.nekowu.net/en/2022/02/22/2022-02-22-Saphire/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Wii Wu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>February 22, 2022</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/en/2022/03/08/2022-03-07-CVE-2021-3129/" title="CVE-2021-3129 Laravel debug mode: Remote code execution">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CVE-2021-3129 Laravel debug mode: Remote code execution</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/en/2021/10/22/2021-10-22-HITCON_2018_One_Line_PHP/" title="HITCON 2018 One Line PHP Challenge">
+                        <span class="hidden-mobile">HITCON 2018 One Line PHP Challenge</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/en/js/events.js" ></script>
+<script  src="/en/js/plugins.js" ></script>
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/en/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/en/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/en/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+<!-- hexo injector body_end start -->
+  <script src="/en/js/hexo_resize_image.js"></script>
+  <script>
+    (() => {
+      const button = document.getElementById('language-toggle-btn');
+      if (!button) return;
+      button.addEventListener('click', () => {
+        const path = window.location.pathname;
+        const target = path === '/en' || path === '/en/'
+          ? '/'
+          : path.startsWith('/en/')
+            ? path.slice(3)
+            : '/en' + path;
+        window.location.assign(target + window.location.search + window.location.hash);
+      });
+    })();
+  </script>
+<!-- hexo injector body_end end --></body>
+</html>
